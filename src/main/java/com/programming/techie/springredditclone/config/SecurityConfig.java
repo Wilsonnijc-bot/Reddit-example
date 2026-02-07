@@ -30,6 +30,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/login", "/sign-up", "/list-subreddits",
+                                "/create-post", "/create-subreddit", "/view-post/**", "/user-profile/**").permitAll()
+                        .requestMatchers("/assets/**", "/**/*.js", "/**/*.css", "/**/*.map").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/subreddit", "/api/subreddit/**").permitAll()
