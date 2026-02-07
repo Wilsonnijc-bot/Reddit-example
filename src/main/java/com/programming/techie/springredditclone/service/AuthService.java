@@ -70,10 +70,16 @@ public class AuthService {
     }
 
     private void fetchUserAndEnable(VerificationToken verificationToken) {
-        String username = verificationToken.getUser().getUsername();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("User not found with name - " + username));
+        User user = verificationToken.getUser();
+        if (user == null) {
+            throw new SpringRedditException("User not found for verification token");
+        }
+        if (user.isEnabled()) {
+            return;
+        }
         user.setEnabled(true);
         userRepository.save(user);
+        verificationTokenRepository.delete(verificationToken);
     }
 
     private String generateVerificationToken(User user) {
