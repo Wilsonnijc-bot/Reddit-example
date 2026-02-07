@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/user-profile/**", "/account-verification/**", "/signup").permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/*.js", "/*.css", "/*.map").permitAll()
+                        .requestMatchers("/tinymce/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/subreddit", "/api/subreddit/**").permitAll()
