@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { SubredditModel } from 'src/app/subreddit/subreddit-response';
 import { Router } from '@angular/router';
 import { PostService } from 'src/app/shared/post.service';
-import { SubredditService } from 'src/app/subreddit/subreddit.service';
 import { CreatePostPayload } from './create-post.payload';
 import { ToastrService } from 'ngx-toastr';
 
@@ -16,10 +14,13 @@ export class CreatePostComponent implements OnInit {
 
   createPostForm: FormGroup;
   postPayload: CreatePostPayload;
-  subreddits: Array<SubredditModel>;
+  readonly domainOptions = [
+    { value: 'all', label: 'all' },
+    { value: 'discussions', label: 'discussions' },
+    { value: 'AI prospects', label: 'AI prospects' },
+  ];
 
-  constructor(private router: Router, private postService: PostService,
-    private subredditService: SubredditService, private toastr: ToastrService) {
+  constructor(private router: Router, private postService: PostService, private toastr: ToastrService) {
     this.postPayload = {
       postName: '',
       url: '',
@@ -31,14 +32,9 @@ export class CreatePostComponent implements OnInit {
   ngOnInit() {
     this.createPostForm = new FormGroup({
       postName: new FormControl('', Validators.required),
-      subredditName: new FormControl('', Validators.required),
+      subredditName: new FormControl('all', Validators.required),
       url: new FormControl(''),
       description: new FormControl('', Validators.required),
-    });
-    this.subredditService.getAllSubreddits().subscribe((data) => {
-      this.subreddits = data;
-    }, () => {
-      this.toastr.error('Failed to load communities');
     });
   }
 
@@ -48,8 +44,14 @@ export class CreatePostComponent implements OnInit {
       return;
     }
 
+    const subredditName = this.createPostForm.get('subredditName').value;
+    if (subredditName === 'all') {
+      this.toastr.error('Please choose discussions or AI prospects before posting');
+      return;
+    }
+
     this.postPayload.postName = this.createPostForm.get('postName').value;
-    this.postPayload.subredditName = this.createPostForm.get('subredditName').value;
+    this.postPayload.subredditName = subredditName;
     this.postPayload.url = (this.createPostForm.get('url').value || '').trim();
     this.postPayload.description = this.createPostForm.get('description').value;
 

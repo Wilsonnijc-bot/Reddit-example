@@ -2,7 +2,20 @@
   <div class="container">
     <div class="row">
       <hr />
-      <div class="col-md-9">
+      <div class="col-md-2">
+        <div class="domain-sidebar">
+          <div class="domain-title">Domains</div>
+          <button
+            *ngFor="let domain of domains"
+            type="button"
+            class="domain-item"
+            [class.active]="selectedDomain === domain.key"
+            (click)="selectDomain(domain.key)">
+            {{domain.label}}
+          </button>
+        </div>
+      </div>
+      <div class="col-md-7">
         <app-post-tile [posts]="posts"></app-post-tile>
       </div>
       <div class="col-md-3">
