@@ -27,6 +27,8 @@ public class Post {
     @Nullable
     private String url;
     @Nullable
+    private String videoKey;
+    @Nullable
     @Lob
     private String description;
     @Builder.Default

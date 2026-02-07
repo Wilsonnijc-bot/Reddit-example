@@ -11,6 +11,7 @@ public enum VoteType {
     private int direction;
 
     VoteType(int direction) {
+        this.direction = direction;
     }
 
     public static VoteType lookup(Integer direction) {

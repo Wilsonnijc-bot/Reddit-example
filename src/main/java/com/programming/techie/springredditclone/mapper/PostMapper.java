@@ -10,6 +10,7 @@ import com.programming.techie.springredditclone.model.VoteType;
 import com.programming.techie.springredditclone.repository.CommentRepository;
 import com.programming.techie.springredditclone.repository.VoteRepository;
 import com.programming.techie.springredditclone.service.AuthService;
+import com.programming.techie.springredditclone.service.VideoStorageService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -31,6 +32,8 @@ public abstract class PostMapper {
     protected VoteRepository voteRepository;
     @Autowired
     protected AuthService authService;
+    @Autowired
+    protected VideoStorageService videoStorageService;
 
 
     @Mapping(target = "postId", ignore = true)
@@ -38,6 +41,7 @@ public abstract class PostMapper {
     @Mapping(target = "description", source = "postRequest.description")
     @Mapping(target = "postName", source = "postRequest.postName")
     @Mapping(target = "url", source = "postRequest.url")
+    @Mapping(target = "videoKey", source = "postRequest.videoKey")
     @Mapping(target = "subreddit", source = "subreddit")
     @Mapping(target = "voteCount", constant = "0")
     @Mapping(target = "user", source = "user")
@@ -46,6 +50,7 @@ public abstract class PostMapper {
     @Mapping(target = "id", source = "postId")
     @Mapping(target = "postName", source = "postName")
     @Mapping(target = "url", source = "url")
+    @Mapping(target = "videoUrl", expression = "java(resolveVideoUrl(post))")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "subredditName", source = "subreddit.name")
     @Mapping(target = "userName", source = "user.username")
@@ -58,6 +63,10 @@ public abstract class PostMapper {
 
     Integer commentCount(Post post) {
         return commentRepository.findByPost(post).size();
+    }
+
+    String resolveVideoUrl(Post post) {
+        return videoStorageService.generateViewUrl(post.getVideoKey());
     }
 
     String getDuration(Post post) {

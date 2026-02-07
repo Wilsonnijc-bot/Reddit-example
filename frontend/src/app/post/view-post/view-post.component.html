@@ -3,10 +3,7 @@
     <hr />
     <div class="col-md-9">
       <div class="row post">
-        <div class="col-md-1">
-          <app-vote-button [post]="post"></app-vote-button>
-        </div>
-        <div class="col-md-11">
+        <div class="col-md-12">
           <span>
             <span class="subreddit-text"><a class="post-url" href="">{{post.subredditName}}</a></span>
             <span> . Posted
@@ -16,9 +13,18 @@
             </span>
           </span>
           <hr />
-          <a routerLink="post.url" class="post-title">{{post.postName}}</a>
+          <a *ngIf="post.url; else postTitleNoUrl" class="post-title post-url" [href]="post.url" target="_blank" rel="noopener noreferrer">{{post.postName}}</a>
+          <ng-template #postTitleNoUrl>
+            <span class="post-title">{{post.postName}}</span>
+          </ng-template>
+          <div *ngIf="post.videoUrl">
+            <video class="post-video" controls preload="metadata" [src]="post.videoUrl"></video>
+          </div>
           <div>
             <p class="post-text" [innerHtml]="post.description"></p>
+          </div>
+          <div class="post-actions">
+            <app-vote-button [post]="post"></app-vote-button>
           </div>
           <div class="post-comment">
             <form [formGroup]="commentForm" (ngSubmit)="postComment()">

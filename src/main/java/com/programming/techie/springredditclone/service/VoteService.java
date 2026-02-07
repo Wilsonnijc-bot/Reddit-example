@@ -2,9 +2,9 @@ package com.programming.techie.springredditclone.service;
 
 import com.programming.techie.springredditclone.dto.VoteDto;
 import com.programming.techie.springredditclone.exceptions.PostNotFoundException;
-import com.programming.techie.springredditclone.exceptions.SpringRedditException;
 import com.programming.techie.springredditclone.model.Post;
 import com.programming.techie.springredditclone.model.Vote;
+import com.programming.techie.springredditclone.model.VoteType;
 import com.programming.techie.springredditclone.repository.PostRepository;
 import com.programming.techie.springredditclone.repository.VoteRepository;
 import lombok.AllArgsConstructor;
@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-
-import static com.programming.techie.springredditclone.model.VoteType.UPVOTE;
 
 @Service
 @AllArgsConstructor
@@ -27,27 +25,48 @@ public class VoteService {
     public void vote(VoteDto voteDto) {
         Post post = postRepository.findById(voteDto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException("Post Not Found with ID - " + voteDto.getPostId()));
-        Optional<Vote> voteByPostAndUser = voteRepository.findTopByPostAndUserOrderByVoteIdDesc(post, authService.getCurrentUser());
-        if (voteByPostAndUser.isPresent() &&
-                voteByPostAndUser.get().getVoteType()
-                        .equals(voteDto.getVoteType())) {
-            throw new SpringRedditException("You have already "
-                    + voteDto.getVoteType() + "'d for this post");
+        VoteType requestedVote = voteDto.getVoteType();
+        Optional<Vote> existingVoteOptional =
+                voteRepository.findTopByPostAndUserOrderByVoteIdDesc(post, authService.getCurrentUser());
+
+        if (existingVoteOptional.isPresent()) {
+            Vote existingVote = existingVoteOptional.get();
+            VoteType existingVoteType = existingVote.getVoteType();
+
+            if (existingVoteType == requestedVote) {
+                adjustVoteCount(post, -toDirection(existingVoteType));
+                voteRepository.delete(existingVote);
+                postRepository.save(post);
+                return;
+            }
+
+            int voteDelta = toDirection(requestedVote) - toDirection(existingVoteType);
+            adjustVoteCount(post, voteDelta);
+            existingVote.setVoteType(requestedVote);
+            voteRepository.save(existingVote);
+            postRepository.save(post);
+            return;
         }
-        if (UPVOTE.equals(voteDto.getVoteType())) {
-            post.setVoteCount(post.getVoteCount() + 1);
-        } else {
-            post.setVoteCount(post.getVoteCount() - 1);
-        }
-        voteRepository.save(mapToVote(voteDto, post));
+
+        adjustVoteCount(post, toDirection(requestedVote));
+        voteRepository.save(mapToVote(requestedVote, post));
         postRepository.save(post);
     }
 
-    private Vote mapToVote(VoteDto voteDto, Post post) {
+    private Vote mapToVote(VoteType voteType, Post post) {
         return Vote.builder()
-                .voteType(voteDto.getVoteType())
+                .voteType(voteType)
                 .post(post)
                 .user(authService.getCurrentUser())
                 .build();
+    }
+
+    private void adjustVoteCount(Post post, int delta) {
+        int currentVoteCount = post.getVoteCount() == null ? 0 : post.getVoteCount();
+        post.setVoteCount(currentVoteCount + delta);
+    }
+
+    private int toDirection(VoteType voteType) {
+        return voteType == VoteType.UPVOTE ? 1 : -1;
     }
 }

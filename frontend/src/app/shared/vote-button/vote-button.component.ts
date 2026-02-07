@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { PostModel } from '../post-model';
-import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import { VotePayload } from './vote-payload';
 import { VoteType } from './vote-type';
 import { VoteService } from '../vote.service';
@@ -18,10 +18,8 @@ export class VoteButtonComponent implements OnInit {
 
   @Input() post: PostModel;
   votePayload: VotePayload;
-  faArrowUp = faArrowUp;
-  faArrowDown = faArrowDown;
-  upvoteColor: string;
-  downvoteColor: string;
+  faThumbsUp = faThumbsUp;
+  faThumbsDown = faThumbsDown;
   isLoggedIn: boolean;
 
   constructor(private voteService: VoteService,
@@ -42,13 +40,11 @@ export class VoteButtonComponent implements OnInit {
   upvotePost() {
     this.votePayload.voteType = VoteType.UPVOTE;
     this.vote();
-    this.downvoteColor = '';
   }
 
   downvotePost() {
     this.votePayload.voteType = VoteType.DOWNVOTE;
     this.vote();
-    this.upvoteColor = '';
   }
 
   private vote() {
