@@ -14,6 +14,18 @@
     margin-bottom: 10px;
 }
 
+.sidebar-banner{
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: linear-gradient(90deg, #eef5ff 0%, #f7faff 100%);
+    color: #1c1c1c;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+}
+
 .btnCreatePost, .btnCreateSubreddit{
     background-color: #0079D3;
     border-color: #0079D3;
