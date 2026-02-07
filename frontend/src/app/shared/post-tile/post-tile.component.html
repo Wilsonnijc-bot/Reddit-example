@@ -1,37 +1,57 @@
-<!-- Display Posts-->
-<div class="row post" *ngFor="let post of posts">
-  <!-- Section to Display Post Information-->
-  <div class="col-md-12">
-    <span class="subreddit-info">
-      <span class="subreddit-text"><a class="posturl" routerLink="">{{post.subredditName}}</a></span>
-      <span> . Posted by <a class="username" routerLink="/user/{{post.userName}}">{{post.userName}}</a></span>
-      <span> . {{post.duration}}</span>
-    </span>
-    <hr />
-    <div class="post-title">
-      <a *ngIf="post.url; else postTitleNoUrl" class="postname" [href]="post.url" target="_blank" rel="noopener noreferrer">{{post.postName}}</a>
-      <ng-template #postTitleNoUrl>
-        <span class="postname">{{post.postName}}</span>
-      </ng-template>
+<div class="hf-post-card" *ngFor="let post of posts">
+  <div class="hf-post-header">
+    <div class="hf-post-meta">
+      <span class="hf-community">h/{{post.subredditName}}</span>
+      <span class="hf-dot">•</span>
+      <span>{{post.duration}}</span>
     </div>
-    <div *ngIf="post.videoUrl">
-      <video class="post-video" controls preload="metadata" [src]="post.videoUrl"></video>
-    </div>
-    <div>
-      <p class="post-text" [innerHtml]="post.description"></p>
-    </div>
-    <hr />
-    <div class="post-actions">
-      <div class="post-actions-left">
-        <a class="btnCommments" role="button">
-          <fa-icon [icon]="faComments"></fa-icon>
-          Comments({{post.commentCount}})
-        </a>
-        <button class="login" (click)="goToPost(post.id)">
-          Read Post
-        </button>
+    <button type="button" class="hf-overflow-btn" aria-label="Post actions">
+      <fa-icon [icon]="faEllipsisH"></fa-icon>
+    </button>
+  </div>
+
+  <div class="hf-post-title">
+    <a *ngIf="isExternalLinkPost(post); else noExternalPostLink" class="hf-post-title-link" [href]="post.url" target="_blank" rel="noopener noreferrer">{{post.postName}}</a>
+    <ng-template #noExternalPostLink>
+      <span>{{post.postName}}</span>
+    </ng-template>
+  </div>
+
+  <ng-container *ngIf="isMediaPost(post); else textPostBlock">
+    <div *ngIf="isVideoPost(post); else imagePostBlock" class="hf-media-wrap">
+      <video class="hf-media-content" controls preload="metadata" [src]="post.videoUrl"></video>
+      <div class="hf-media-badge">
+        <fa-icon [icon]="faPlay"></fa-icon>
+        <fa-icon [icon]="faVolumeMute"></fa-icon>
       </div>
-      <app-vote-button [post]="post"></app-vote-button>
     </div>
+    <ng-template #imagePostBlock>
+      <div class="hf-media-wrap" *ngIf="getImageUrl(post) as imageUrl">
+        <img class="hf-media-content" [src]="imageUrl" [alt]="post.postName">
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <ng-template #textPostBlock>
+    <p *ngIf="post.description" class="hf-text-preview" [innerHtml]="post.description"></p>
+  </ng-template>
+
+  <div class="hf-post-footer">
+    <app-vote-button [post]="post"></app-vote-button>
+
+    <button type="button" class="hf-action-btn" (click)="goToPost(post.id)">
+      <fa-icon [icon]="faComments"></fa-icon>
+      <span>{{post.commentCount}}</span>
+    </button>
+
+    <button type="button" class="hf-action-btn">
+      <fa-icon [icon]="faHeart"></fa-icon>
+      <span>{{post.voteCount}}</span>
+    </button>
+
+    <button type="button" class="hf-action-btn" (click)="sharePost(post)">
+      <fa-icon [icon]="faShare"></fa-icon>
+      <span>Share</span>
+    </button>
   </div>
 </div>

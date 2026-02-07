@@ -1,11 +1,8 @@
 <div class="vote-actions">
-    <button type="button" class="vote-btn like-btn" [class.active]="post.upVote" (click)="upvotePost()">
+    <button type="button" class="vote-btn like-btn" [class.active]="post.upVote" (click)="upvotePost()" aria-label="Upvote">
         <fa-icon [icon]="faThumbsUp"></fa-icon>
-        Like
     </button>
-    <span class="vote-count">{{post.voteCount}}</span>
-    <button type="button" class="vote-btn dislike-btn" [class.active]="post.downVote" (click)="downvotePost()">
+    <button type="button" class="vote-btn dislike-btn" [class.active]="post.downVote" (click)="downvotePost()" aria-label="Downvote">
         <fa-icon [icon]="faThumbsDown"></fa-icon>
-        Dislike
     </button>
 </div>

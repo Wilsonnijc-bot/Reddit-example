@@ -1,7 +1,7 @@
 .vote-actions {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .vote-btn {
@@ -9,12 +9,11 @@
     background-color: #ffffff;
     color: #4f5459;
     border-radius: 18px;
-    padding: 6px 12px;
+    padding: 5px 9px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
 }
 
 .vote-btn:hover {
@@ -29,11 +28,4 @@
 .vote-btn.active.dislike-btn {
     border-color: #c62828;
     color: #c62828;
-}
-
-.vote-count {
-    min-width: 28px;
-    text-align: center;
-    font-weight: bold;
-    color: #1f2328;
 }
