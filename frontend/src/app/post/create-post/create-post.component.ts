@@ -6,6 +6,7 @@ import { PostService } from 'src/app/shared/post.service';
 import { SubredditService } from 'src/app/subreddit/subreddit.service';
 import { throwError } from 'rxjs';
 import { CreatePostPayload } from './create-post.payload';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-create-post',
@@ -19,7 +20,7 @@ export class CreatePostComponent implements OnInit {
   subreddits: Array<SubredditModel>;
 
   constructor(private router: Router, private postService: PostService,
-    private subredditService: SubredditService) {
+    private subredditService: SubredditService, private toastr: ToastrService) {
     this.postPayload = {
       postName: '',
       url: '',
@@ -43,14 +44,21 @@ export class CreatePostComponent implements OnInit {
   }
 
   createPost() {
+    if (this.createPostForm.invalid) {
+      this.toastr.error('Please fill in all required fields');
+      return;
+    }
+
     this.postPayload.postName = this.createPostForm.get('postName').value;
     this.postPayload.subredditName = this.createPostForm.get('subredditName').value;
     this.postPayload.url = this.createPostForm.get('url').value;
     this.postPayload.description = this.createPostForm.get('description').value;
 
     this.postService.createPost(this.postPayload).subscribe((data) => {
+      this.toastr.success('Post created successfully');
       this.router.navigateByUrl('/');
     }, error => {
+      this.toastr.error('Create post failed. Please login again and try once more.');
       throwError(error);
     })
   }
