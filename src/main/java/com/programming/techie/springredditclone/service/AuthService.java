@@ -44,6 +44,13 @@ public class AuthService {
 
 
     public void signup(RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new SpringRedditException("Username is already taken");
+        }
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new SpringRedditException("Email is already in use");
+        }
+
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setEmail(registerRequest.getEmail());
