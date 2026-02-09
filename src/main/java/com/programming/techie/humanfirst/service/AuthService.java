@@ -12,6 +12,7 @@ import com.programming.techie.humanfirst.repository.UserRepository;
 import com.programming.techie.humanfirst.repository.VerificationTokenRepository;
 import com.programming.techie.humanfirst.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,12 +25,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
@@ -46,6 +50,8 @@ public class AuthService {
     public void signup(RegisterRequest registerRequest) {
         String normalizedUsername = registerRequest.getUsername() == null ? "" : registerRequest.getUsername().trim();
         String normalizedEmail = registerRequest.getEmail() == null ? "" : registerRequest.getEmail().trim();
+
+        cleanupPendingConflicts(normalizedUsername, normalizedEmail);
 
         if (userRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
             throw new HumanfirstException("Username is already taken");
@@ -142,5 +148,27 @@ public class AuthService {
             return "https://humanfirst-0dc0273c37c7.herokuapp.com";
         }
         return rawBaseUrl.endsWith("/") ? rawBaseUrl.substring(0, rawBaseUrl.length() - 1) : rawBaseUrl;
+    }
+
+    private void cleanupPendingConflicts(String username, String email) {
+        Set<Long> pendingUserIds = new LinkedHashSet<>();
+
+        userRepository.findFirstByUsernameIgnoreCaseOrderByUserIdDesc(username)
+                .filter(user -> !user.isEnabled())
+                .map(User::getUserId)
+                .ifPresent(pendingUserIds::add);
+
+        userRepository.findFirstByEmailIgnoreCaseOrderByUserIdDesc(email)
+                .filter(user -> !user.isEnabled())
+                .map(User::getUserId)
+                .ifPresent(pendingUserIds::add);
+
+        pendingUserIds.forEach(this::deletePendingRegistrationByUserId);
+    }
+
+    private void deletePendingRegistrationByUserId(Long userId) {
+        long deletedTokens = verificationTokenRepository.deleteByUserUserId(userId);
+        userRepository.deleteById(userId);
+        log.info("Deleted stale pending registration for userId={} (tokensDeleted={})", userId, deletedTokens);
     }
 }
