@@ -413,9 +413,9 @@ module.exports = exported;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /Users/nijiachen/Reddit-example-1/frontend/node_modules/bootstrap/dist/css/bootstrap.min.css */"./node_modules/bootstrap/dist/css/bootstrap.min.css");
-__webpack_require__(/*! /Users/nijiachen/Reddit-example-1/frontend/src/styles.css */"./src/styles.css");
-module.exports = __webpack_require__(/*! /Users/nijiachen/Reddit-example-1/frontend/node_modules/ngx-toastr/toastr.css */"./node_modules/ngx-toastr/toastr.css");
+__webpack_require__(/*! /Users/nijiachen/humanfirst-MVP/frontend/node_modules/bootstrap/dist/css/bootstrap.min.css */"./node_modules/bootstrap/dist/css/bootstrap.min.css");
+__webpack_require__(/*! /Users/nijiachen/humanfirst-MVP/frontend/src/styles.css */"./src/styles.css");
+module.exports = __webpack_require__(/*! /Users/nijiachen/humanfirst-MVP/frontend/node_modules/ngx-toastr/toastr.css */"./node_modules/ngx-toastr/toastr.css");
 
 
 /***/ })

@@ -1,4 +1,4 @@
-# Reddit Example (Spring Boot + Angular)
+# humanfirst-MVP (Spring Boot + Angular)
 
 Full-stack Reddit-style app with:
 - Java/Spring Boot backend (REST API, JWT auth, JPA)
@@ -51,10 +51,10 @@ Browser
 ## Mini File-Structure Flow Chart
 
 ```text
-Reddit-example-1
+humanfirst-MVP
 ├─ src/
 │  └─ main/
-│     ├─ java/com/programming/techie/springredditclone/
+│     ├─ java/com/programming/techie/humanfirst/
 │     │  ├─ controller/   (REST endpoints)
 │     │  ├─ service/      (business logic)
 │     │  ├─ repository/   (DB access)
@@ -158,7 +158,7 @@ From repo root:
 cd frontend
 npm install
 npm run build -- --prod
-rsync -av --delete dist/angular-reddit-clone/ ../src/main/resources/static/
+rsync -av --delete dist/humanfirst-mvp/ ../src/main/resources/static/
 ```
 
 Then package backend:

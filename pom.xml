@@ -9,9 +9,9 @@
         <relativePath/>
     </parent>
     <groupId>com.programming.techie</groupId>
-    <artifactId>spring-reddit-clone</artifactId>
+    <artifactId>humanfirst</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-reddit-clone</name>
+    <name>humanfirst</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>

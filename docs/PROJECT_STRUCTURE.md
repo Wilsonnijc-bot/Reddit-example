@@ -11,7 +11,7 @@ This repository is a Spring Boot backend with an Angular frontend bundled into b
 - `src/main/resources`: Backend configuration, templates, and deployed frontend assets.
 - `frontend`: Angular source project.
 
-## Backend (`src/main/java/com/programming/techie/springredditclone`)
+## Backend (`src/main/java/com/programming/techie/humanfirst`)
 
 - `controller`: REST endpoints (`/api/auth`, `/api/posts`, `/api/subreddit`, etc.).
 - `service`: Business logic (auth, posts, votes, comments, mail).

@@ -2472,7 +2472,7 @@ Object(_angular_platform_browser_dynamic__WEBPACK_IMPORTED_MODULE_2__["platformB
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/nijiachen/Reddit-example-1/frontend/src/main.ts */"./src/main.ts");
+module.exports = __webpack_require__(/*! /Users/nijiachen/humanfirst-MVP/frontend/src/main.ts */"./src/main.ts");
 
 
 /***/ })

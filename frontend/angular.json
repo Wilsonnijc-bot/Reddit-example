@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-reddit-clone": {
+    "humanfirst-mvp": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/angular-reddit-clone",
+            "outputPath": "dist/humanfirst-mvp",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -70,18 +70,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "angular-reddit-clone:build"
+            "browserTarget": "humanfirst-mvp:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "angular-reddit-clone:build:production"
+              "browserTarget": "humanfirst-mvp:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "angular-reddit-clone:build"
+            "browserTarget": "humanfirst-mvp:build"
           }
         },
         "test": {
@@ -118,15 +118,15 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "angular-reddit-clone:serve"
+            "devServerTarget": "humanfirst-mvp:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "angular-reddit-clone:serve:production"
+              "devServerTarget": "humanfirst-mvp:serve:production"
             }
           }
         }
       }
     }},
-  "defaultProject": "angular-reddit-clone"
+  "defaultProject": "humanfirst-mvp"
 }

@@ -4469,7 +4469,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
   /***/
   function _(module, exports, __webpack_require__) {
     module.exports = __webpack_require__(
-    /*! /Users/nijiachen/Reddit-example-1/frontend/src/main.ts */
+    /*! /Users/nijiachen/humanfirst-MVP/frontend/src/main.ts */
     "./src/main.ts");
     /***/
   }
