@@ -11,11 +11,15 @@
   margin-top: 5px;
 }
 
+.create-post-main {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
 .create-post-container {
   margin-top: 10px;
   --post-line-color: #ccc;
   border: 1px solid #ccc;
-  margin-top: 10px;
   margin-bottom: 10px;
   overflow: hidden;
   background-color: rgba(255, 255, 255, 0.8);

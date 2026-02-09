@@ -1,50 +1,76 @@
-header{
+header {
     border-radius: 1px solid;
 }
-.reddit-text{        
+
+.hf-navbar {
+    border-bottom: 1px solid #edeff1;
+}
+
+.hf-navbar-inner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.reddit-text {
     font-weight: 700;
     font-size: 32px;
     line-height: 1.1;
     color: #1c1c1c;
 }
-.logo{
+
+.logo {
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     padding-left: 6px;
 }
 
-.login, .sign-up{    
-    background-color: transparent;
-    border-color: #0079D3;
-    color: #0079D3;
-    fill: #0079D3;
-    border: 1px solid;
-    border-radius: 4px;
-    box-sizing: border-box;
-    text-align: center;
-    letter-spacing: 1px;
-    text-decoration: none;
-    font-size: 12px;
+.hf-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.create-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid #0079d3;
+    background-color: #0079d3;
+    color: #ffffff;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: .5px;
-    line-height: 24px;
-    text-transform: uppercase;
-    padding: 3px 16px;
-    opacity: 1;  
+    text-decoration: none;
+    cursor: pointer;
 }
 
-.sign-up{
-    background-color: #0079D3;
-    border-color: #0079D3;
-    color: aliceblue;
+.create-link:hover,
+.create-link:focus {
+    color: #ffffff;
+    text-decoration: none;
+    opacity: 0.9;
 }
 
-.sign-up:hover{
-    opacity: 0.6;
+.create-link:focus {
+    outline: 2px solid #80bdff;
+    outline-offset: 2px;
 }
 
-.userdetails{    
+.login,
+.sign-up {
     background-color: transparent;
     border-color: #0079D3;
     color: #0079D3;
@@ -53,7 +79,6 @@ header{
     border-radius: 4px;
     box-sizing: border-box;
     text-align: center;
-    letter-spacing: 1px;
     text-decoration: none;
     font-size: 12px;
     font-weight: 700;
@@ -62,14 +87,43 @@ header{
     text-transform: uppercase;
     padding: 3px 16px;
     opacity: 1;
-    border: 0px;
 }
 
-.userdetails:hover{
+.sign-up {
+    background-color: #0079D3;
+    border-color: #0079D3;
+    color: aliceblue;
+}
+
+.sign-up:hover {
+    opacity: 0.6;
+}
+
+.userdetails {
+    background-color: transparent;
+    border-color: #0079D3;
+    color: #0079D3;
+    fill: #0079D3;
+    border: 1px solid;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    line-height: 24px;
+    text-transform: uppercase;
+    padding: 3px 16px;
+    opacity: 1;
+    border: 0;
+}
+
+.userdetails:hover {
     border: 1px solid;
 }
 
-.dropdown-item{
+.dropdown-item {
     background-color: #f8f9fa;
     font-size: 14px;
     font-weight: 500;
@@ -78,18 +132,36 @@ header{
     vertical-align: middle;
 }
 
-.dropdown-item:hover{
+.dropdown-item:hover {
     background-color: #0079D3;
 }
 
-.dropdown-menu{
+.dropdown-menu {
     background-color: #f8f9fa;
 }
 
-.account-icon{
+.account-icon {
     border-radius: 4px;
-    float: left;
     margin-right: 5px;
     max-height: 24px;
     max-width: 24px;
+}
+
+@media (max-width: 767px) {
+    .reddit-text {
+        font-size: 24px;
+    }
+
+    .create-link {
+        padding: 0 10px;
+    }
+
+    .create-link span {
+        display: none;
+    }
+
+    .login,
+    .sign-up {
+        padding: 3px 10px;
+    }
 }

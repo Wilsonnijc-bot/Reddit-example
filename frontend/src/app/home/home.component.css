@@ -11,6 +11,15 @@
   top: 12px;
 }
 
+.hf-main-col {
+  padding-bottom: 12px;
+}
+
+.hf-main-feed {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
 .hf-brand {
   font-size: 20px;
   font-weight: 700;
@@ -80,4 +89,15 @@
 
 .hf-action-row {
   margin: 2px 0;
+}
+
+@media (max-width: 991px) {
+  .hf-sidebar {
+    position: static;
+    margin-bottom: 12px;
+  }
+
+  .hf-main-feed {
+    max-width: 100%;
+  }
 }
