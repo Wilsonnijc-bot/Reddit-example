@@ -44,16 +44,19 @@ public class AuthService {
 
 
     public void signup(RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+        String normalizedUsername = registerRequest.getUsername() == null ? "" : registerRequest.getUsername().trim();
+        String normalizedEmail = registerRequest.getEmail() == null ? "" : registerRequest.getEmail().trim();
+
+        if (userRepository.existsByUsernameIgnoreCase(normalizedUsername)) {
             throw new HumanfirstException("Username is already taken");
         }
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+        if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new HumanfirstException("Email is already in use");
         }
 
         User user = new User();
-        user.setUsername(registerRequest.getUsername());
-        user.setEmail(registerRequest.getEmail());
+        user.setUsername(normalizedUsername);
+        user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCreated(Instant.now());
         user.setEnabled(false);
@@ -105,7 +108,8 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(LoginRequest loginRequest) {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+        String normalizedIdentifier = loginRequest.getUsername() == null ? "" : loginRequest.getUsername().trim();
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(normalizedIdentifier,
                 loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String token = jwtProvider.generateToken(authenticate);
@@ -113,7 +117,7 @@ public class AuthService {
                 .authenticationToken(token)
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-                .username(loginRequest.getUsername())
+                .username(authenticate.getName())
                 .build();
     }
 

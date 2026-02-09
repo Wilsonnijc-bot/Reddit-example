@@ -24,18 +24,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) {
-        Optional<User> userOptional = userRepository.findFirstByUsernameAndEnabledTrueOrderByUserIdDesc(username);
-        if (userOptional.isEmpty() && userRepository.existsByUsername(username)) {
-            throw new DisabledException("Account is not activated");
-        }
-        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("No user " +
-                "Found with username : " + username));
+    public UserDetails loadUserByUsername(String identifier) {
+        String normalizedIdentifier = identifier == null ? "" : identifier.trim();
+        boolean emailLogin = normalizedIdentifier.contains("@");
 
-        return new org.springframework.security
-                .core.userdetails.User(user.getUsername(), user.getPassword(),
-                user.isEnabled(), true, true,
-                true, getAuthorities("USER"));
+        Optional<User> userOptional = userRepository.findFirstByUsernameIgnoreCaseAndEnabledTrueOrderByUserIdDesc(normalizedIdentifier);
+        if (userOptional.isEmpty() && emailLogin) {
+            userOptional = userRepository.findFirstByEmailIgnoreCaseAndEnabledTrueOrderByUserIdDesc(normalizedIdentifier);
+        }
+
+        if (userOptional.isEmpty()) {
+            boolean accountExists = userRepository.existsByUsernameIgnoreCase(normalizedIdentifier)
+                    || (emailLogin && userRepository.existsByEmailIgnoreCase(normalizedIdentifier));
+            if (accountExists) {
+                throw new DisabledException("Account is not activated");
+            }
+        }
+
+        User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("No user Found with username/email : " + normalizedIdentifier));
+
+        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+                user.isEnabled(), true, true, true, getAuthorities("USER"));
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {
