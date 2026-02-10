@@ -17,6 +17,7 @@ public class TopicWeekDetailDto {
     private String slug;
     private String weekTitle;
     private String monthTitle;
+    private String weeklyTopicBody;
 
     @Builder.Default
     private List<TopicSubdivisionDto> subdivisions = new ArrayList<>();

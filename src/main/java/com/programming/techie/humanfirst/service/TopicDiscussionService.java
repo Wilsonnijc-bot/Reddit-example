@@ -203,6 +203,7 @@ public class TopicDiscussionService {
                 .slug(topicWeek.getSlug())
                 .weekTitle(topicWeek.getWeekTitle())
                 .monthTitle(topicWeek.getMonthTitle())
+                .weeklyTopicBody(topicWeek.getWeeklyTopicBody())
                 .subdivisions(subdivisions)
                 .voteSummary(voteSummary)
                 .proComments(commentSplit.proRoots)

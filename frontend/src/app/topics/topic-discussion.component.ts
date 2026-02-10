@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../auth/shared/auth.service';
@@ -20,6 +20,7 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
 
   proCommentText = '';
   conCommentText = '';
+  viewMode: 'month' | 'week' = 'month';
 
   private currentSlug: string | null = null;
   private routeSubscription?: Subscription;
@@ -28,6 +29,7 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
   constructor(
     private topicDiscussionService: TopicDiscussionService,
     private activatedRoute: ActivatedRoute,
+    private router: Router,
     private toastr: ToastrService,
     private authService: AuthService
   ) {
@@ -41,6 +43,7 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
 
     this.routeSubscription = this.activatedRoute.paramMap.subscribe((params) => {
       this.currentSlug = params.get('slug');
+      this.viewMode = this.currentSlug ? 'week' : 'month';
       this.loadTopic();
     });
   }
@@ -118,6 +121,28 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
       return 50;
     }
     return this.topic.voteSummary.conPercent;
+  }
+
+  isMonthView(): boolean {
+    return this.viewMode === 'month';
+  }
+
+  goToCurrentWeekTopic(): void {
+    if (!this.topic?.slug) {
+      return;
+    }
+
+    this.router.navigate(['/topics', this.topic.slug]);
+  }
+
+  getWeeklyTopicBody(): string {
+    const body = (this.topic?.weeklyTopicBody || '').trim();
+    if (body) {
+      return body;
+    }
+
+    const fallbackTitle = (this.topic?.weekTitle || 'this week topic').trim();
+    return `Use this space to add a longer background passage for "${fallbackTitle}". It should cover context, key trade-offs, and what to consider before joining the Pro vs Con debate.`;
   }
 
   trackBySubdivision(index: number, item: { id: number }): number {

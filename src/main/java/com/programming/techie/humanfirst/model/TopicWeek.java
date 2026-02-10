@@ -36,6 +36,9 @@ public class TopicWeek {
     @Column(nullable = false, length = 240)
     private String monthTitle;
 
+    @Lob
+    private String weeklyTopicBody;
+
     @Column(nullable = false)
     private Boolean active;
 

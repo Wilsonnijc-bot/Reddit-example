@@ -32,6 +32,7 @@ export interface TopicWeekDetail {
   slug: string;
   weekTitle: string;
   monthTitle: string;
+  weeklyTopicBody?: string;
   subdivisions: TopicSubdivision[];
   voteSummary: TopicVoteSummary;
   proComments: TopicComment[];
