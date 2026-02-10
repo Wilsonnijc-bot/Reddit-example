@@ -13,6 +13,8 @@ export interface TopicVoteSummary {
   proPercent: number;
   conPercent: number;
   userStance: TopicStance | null;
+  userProVoted: boolean;
+  userConVoted: boolean;
 }
 
 export interface TopicComment {

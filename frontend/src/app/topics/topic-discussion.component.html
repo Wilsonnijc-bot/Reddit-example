@@ -121,14 +121,14 @@
         <button
           type="button"
           class="topic-btn pro-btn"
-          [class.active]="topic.voteSummary.userStance === 'PRO'"
+          [class.active]="topic.voteSummary.userProVoted"
           (click)="vote('PRO')">
           Take Pro Side
         </button>
         <button
           type="button"
           class="topic-btn con-btn"
-          [class.active]="topic.voteSummary.userStance === 'CON'"
+          [class.active]="topic.voteSummary.userConVoted"
           (click)="vote('CON')">
           Take Con Side
         </button>

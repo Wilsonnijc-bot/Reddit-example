@@ -64,29 +64,15 @@ public class TopicDiscussionService {
                 .orElseThrow(() -> new HumanfirstException("Topic not found with id: " + topicId));
 
         User currentUser = authService.getCurrentUser();
-        Optional<TopicStanceVote> existingVote = topicStanceVoteRepository.findByTopicWeekAndUser(topicWeek, currentUser);
-
-        if (existingVote.isPresent()) {
-            TopicStanceVote vote = existingVote.get();
-
-            if (vote.getStance() == request.getStance()) {
-                topicStanceVoteRepository.delete(vote);
-                return buildVoteSummary(topicWeek, currentUser);
-            }
-
-            vote.setStance(request.getStance());
-            vote.setCreatedDate(Instant.now());
-            topicStanceVoteRepository.save(vote);
-            return buildVoteSummary(topicWeek, currentUser);
+        TopicStanceVote vote = getOrCreateStanceVote(topicWeek, currentUser, request.getStance());
+        normalizeLegacyVoteFlags(vote);
+        if (request.getStance() == TopicStance.PRO) {
+            vote.setProVoted(!isProVoted(vote));
+        } else {
+            vote.setConVoted(!isConVoted(vote));
         }
-
-        TopicStanceVote vote = TopicStanceVote.builder()
-                .topicWeek(topicWeek)
-                .user(currentUser)
-                .stance(request.getStance())
-                .createdDate(Instant.now())
-                .build();
-
+        vote.setStance(request.getStance());
+        vote.setCreatedDate(Instant.now());
         topicStanceVoteRepository.save(vote);
         return buildVoteSummary(topicWeek, currentUser);
     }
@@ -132,6 +118,7 @@ public class TopicDiscussionService {
                 .build();
 
         TopicComment saved = topicCommentRepository.save(comment);
+        registerCommentStanceVote(topicWeek, currentUser, stance);
         return mapComment(saved, Collections.emptySet());
     }
 
@@ -263,18 +250,26 @@ public class TopicDiscussionService {
     }
 
     private TopicVoteSummaryDto buildVoteSummary(TopicWeek topicWeek, User currentUser) {
-        long proVotes = topicStanceVoteRepository.countByTopicWeekAndStance(topicWeek, TopicStance.PRO);
-        long conVotes = topicStanceVoteRepository.countByTopicWeekAndStance(topicWeek, TopicStance.CON);
+        List<TopicStanceVote> votes = topicStanceVoteRepository.findAllByTopicWeek(topicWeek);
+        long proVotes = votes.stream().filter(this::isProVoted).count();
+        long conVotes = votes.stream().filter(this::isConVoted).count();
         long totalVotes = proVotes + conVotes;
 
         int proPercent = totalVotes == 0 ? 0 : (int) Math.round((proVotes * 100.0) / totalVotes);
         int conPercent = totalVotes == 0 ? 0 : Math.max(0, 100 - proPercent);
 
+        boolean userProVoted = false;
+        boolean userConVoted = false;
         TopicStance userStance = null;
         if (currentUser != null) {
-            userStance = topicStanceVoteRepository.findByTopicWeekAndUser(topicWeek, currentUser)
-                    .map(TopicStanceVote::getStance)
-                    .orElse(null);
+            Optional<TopicStanceVote> userVote = topicStanceVoteRepository.findByTopicWeekAndUser(topicWeek, currentUser);
+            userProVoted = userVote.map(this::isProVoted).orElse(false);
+            userConVoted = userVote.map(this::isConVoted).orElse(false);
+            if (userProVoted && !userConVoted) {
+                userStance = TopicStance.PRO;
+            } else if (userConVoted && !userProVoted) {
+                userStance = TopicStance.CON;
+            }
         }
 
         return TopicVoteSummaryDto.builder()
@@ -284,7 +279,87 @@ public class TopicDiscussionService {
                 .proPercent(proPercent)
                 .conPercent(conPercent)
                 .userStance(userStance)
+                .userProVoted(userProVoted)
+                .userConVoted(userConVoted)
                 .build();
+    }
+
+    private void registerCommentStanceVote(TopicWeek topicWeek, User currentUser, TopicStance stance) {
+        TopicStanceVote vote = getOrCreateStanceVote(topicWeek, currentUser, stance);
+        boolean normalizedLegacyFlags = normalizeLegacyVoteFlags(vote);
+        if (stance == TopicStance.PRO && !isProVoted(vote)) {
+            vote.setProVoted(true);
+            vote.setStance(TopicStance.PRO);
+            vote.setCreatedDate(Instant.now());
+            topicStanceVoteRepository.save(vote);
+            return;
+        }
+
+        if (stance == TopicStance.CON && !isConVoted(vote)) {
+            vote.setConVoted(true);
+            vote.setStance(TopicStance.CON);
+            vote.setCreatedDate(Instant.now());
+            topicStanceVoteRepository.save(vote);
+            return;
+        }
+
+        if (vote.getTopicStanceVoteId() == null || normalizedLegacyFlags) {
+            topicStanceVoteRepository.save(vote);
+        }
+    }
+
+    private TopicStanceVote getOrCreateStanceVote(TopicWeek topicWeek, User currentUser, TopicStance fallbackStance) {
+        return topicStanceVoteRepository.findByTopicWeekAndUser(topicWeek, currentUser)
+                .orElseGet(() -> TopicStanceVote.builder()
+                        .topicWeek(topicWeek)
+                        .user(currentUser)
+                        .stance(fallbackStance)
+                        .proVoted(false)
+                        .conVoted(false)
+                        .createdDate(Instant.now())
+                        .build());
+    }
+
+    private boolean isProVoted(TopicStanceVote vote) {
+        if (vote == null) {
+            return false;
+        }
+
+        if (Boolean.TRUE.equals(vote.getProVoted())) {
+            return true;
+        }
+
+        if (vote.getProVoted() == null && vote.getConVoted() == null) {
+            return vote.getStance() == TopicStance.PRO;
+        }
+
+        return false;
+    }
+
+    private boolean isConVoted(TopicStanceVote vote) {
+        if (vote == null) {
+            return false;
+        }
+
+        if (Boolean.TRUE.equals(vote.getConVoted())) {
+            return true;
+        }
+
+        if (vote.getProVoted() == null && vote.getConVoted() == null) {
+            return vote.getStance() == TopicStance.CON;
+        }
+
+        return false;
+    }
+
+    private boolean normalizeLegacyVoteFlags(TopicStanceVote vote) {
+        if (vote == null || vote.getProVoted() != null || vote.getConVoted() != null) {
+            return false;
+        }
+
+        vote.setProVoted(vote.getStance() == TopicStance.PRO);
+        vote.setConVoted(vote.getStance() == TopicStance.CON);
+        return true;
     }
 
     private Optional<User> getCurrentUserOptional() {

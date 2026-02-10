@@ -17,4 +17,6 @@ public class TopicVoteSummaryDto {
     private int proPercent;
     private int conPercent;
     private TopicStance userStance;
+    private boolean userProVoted;
+    private boolean userConVoted;
 }

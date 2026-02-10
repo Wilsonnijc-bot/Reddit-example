@@ -30,6 +30,14 @@ public class TopicStanceVote {
     @Column(nullable = false, length = 12)
     private TopicStance stance;
 
+    @Column(name = "pro_voted")
+    @Builder.Default
+    private Boolean proVoted = false;
+
+    @Column(name = "con_voted")
+    @Builder.Default
+    private Boolean conVoted = false;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "topic_week_id", referencedColumnName = "topicWeekId", nullable = false)
     private TopicWeek topicWeek;
