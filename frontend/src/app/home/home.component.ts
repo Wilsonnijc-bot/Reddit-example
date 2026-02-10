@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import {
   faChevronDown,
@@ -59,11 +59,17 @@ export class HomeComponent implements OnInit {
     private communityService: CommunityService,
     private toastr: ToastrService,
     private router: Router,
+    private route: ActivatedRoute,
     private topicDiscussionService: TopicDiscussionService
   ) {
   }
 
   ngOnInit(): void {
+    const queryDomain = this.normalizeDomainKey(this.route.snapshot.queryParamMap.get('domain'));
+    if (queryDomain) {
+      this.selectedDomain = queryDomain;
+    }
+
     this.loadDomainMapping();
     this.loadTopicLabels();
     this.loadCommunities();
@@ -222,6 +228,19 @@ export class HomeComponent implements OnInit {
     }
     const parsed = new Date(value).getTime();
     return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  private normalizeDomainKey(value: string | null): string | null {
+    if (!value) {
+      return null;
+    }
+
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'all' || Object.keys(this.domainAliases).includes(normalized)) {
+      return normalized;
+    }
+
+    return null;
   }
 
   private normalizeName(value: string): string {

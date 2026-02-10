@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { PostService } from 'src/app/shared/post.service';
 import { CreatePostPayload } from './create-post.payload';
 import { ToastrService } from 'ngx-toastr';
@@ -32,8 +32,11 @@ export class CreatePostComponent implements OnInit {
 
   readonly acceptedFileTypes = '.jpg,.jpeg,.png,.gif,.webp,.heic,.heif,.mp4,.mov,.webm,.mkv';
 
+  private preselectedCommunityId: number | null = null;
+
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private postService: PostService,
     private toastr: ToastrService,
     private videoUploadService: VideoUploadService,
@@ -59,6 +62,12 @@ export class CreatePostComponent implements OnInit {
       url: new FormControl(''),
       description: new FormControl('', Validators.required),
     });
+
+    const queryCommunityId = Number(this.route.snapshot.queryParamMap.get('communityId'));
+    if (Number.isFinite(queryCommunityId) && queryCommunityId > 0) {
+      this.preselectedCommunityId = queryCommunityId;
+      this.createPostForm.patchValue({ communityId: queryCommunityId });
+    }
 
     this.loadCommunities();
     this.loadSubreddits();
@@ -145,6 +154,15 @@ export class CreatePostComponent implements OnInit {
     ).subscribe({
       next: (communities) => {
         this.communityOptions = (communities || []).sort((a, b) => (a?.name || '').localeCompare(b?.name || ''));
+
+        if (!this.preselectedCommunityId) {
+          return;
+        }
+
+        const communityExists = this.communityOptions.some((community) => community.id === this.preselectedCommunityId);
+        if (communityExists) {
+          this.createPostForm.patchValue({ communityId: this.preselectedCommunityId });
+        }
       },
       error: () => {
         this.communityOptions = [];

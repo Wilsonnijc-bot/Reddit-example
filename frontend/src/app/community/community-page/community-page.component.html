@@ -1,83 +1,204 @@
-<div class="community-page" *ngIf="!loading; else communityLoading">
-  <div class="community-not-found" *ngIf="notFound">
-    <h2>Community Not Found</h2>
-    <p>The community you requested does not exist.</p>
-    <button type="button" class="btn btn-outline-primary" routerLink="/communities">Back to Communities</button>
-  </div>
+<div class="humanfirst-body">
+  <div class="hf-layout community-shell">
+    <aside class="hf-sidebar">
+      <nav class="hf-nav">
+        <button
+          *ngFor="let item of primaryNavItems"
+          type="button"
+          class="hf-row"
+          [class.active]="isItemActive(item)"
+          (click)="handlePrimaryNavClick(item)">
+          <fa-icon class="hf-icon" [icon]="item.icon"></fa-icon>
+          <span>{{item.label}}</span>
+        </button>
+      </nav>
 
-  <ng-container *ngIf="!notFound && community as currentCommunity">
-    <section class="community-hero" [style.background-image]="currentCommunity.headerImageUrl ? 'linear-gradient(rgba(11,11,15,0.55), rgba(11,11,15,0.82)), url(' + currentCommunity.headerImageUrl + ')' : 'none'">
-      <div class="community-hero-inner">
-        <h1>{{currentCommunity.name}}</h1>
-        <p>{{currentCommunity.description || 'No community description yet.'}}</p>
+      <div class="hf-home-subitems">
+        <button
+          *ngFor="let item of homeSubItems"
+          type="button"
+          class="hf-row hf-sub-row"
+          [class.active]="isItemActive(item)"
+          (click)="handleHomeSubItemClick(item)">
+          <fa-icon class="hf-icon" [icon]="item.icon"></fa-icon>
+          <span>{{item.label}}</span>
+        </button>
+      </div>
 
-        <div class="community-actions">
+      <hr class="hf-divider" />
+
+      <section class="hf-section">
+        <div class="hf-section-header">
+          <span>TOPICS</span>
+        </div>
+        <div class="hf-row hf-static-row">
+          <span>{{monthlyTopicLabel}}</span>
+        </div>
+        <button type="button" class="hf-row hf-action-row" (click)="goToCurrentTopic()">
+          <span>{{weeklyTopicLabel}}</span>
+        </button>
+        <button type="button" class="hf-row hf-action-row" (click)="goToTopicArchive()">
+          <fa-icon class="hf-icon" [icon]="faCompass"></fa-icon>
+          <span>Discover previous</span>
+        </button>
+      </section>
+
+      <hr class="hf-divider" />
+
+      <button type="button" class="hf-row hf-action-row" (click)="goToCreateSubreddit()">
+        <fa-icon class="hf-icon" [icon]="faPlus"></fa-icon>
+        <span>Start a community</span>
+      </button>
+
+      <hr class="hf-divider" />
+
+      <section class="hf-section">
+        <div class="hf-section-header">
+          <span>COMMUNITIES</span>
+          <fa-icon [icon]="faChevronDown"></fa-icon>
+        </div>
+        <button
+          *ngFor="let item of sidebarCommunities"
+          type="button"
+          class="hf-row"
+          (click)="handleCommunityClick(item)">
+          <fa-icon class="hf-icon" [icon]="faUsers"></fa-icon>
+          <span>{{item.name}}</span>
+        </button>
+
+        <button type="button" class="hf-row hf-action-row" (click)="goToCommunityDirectory()">
+          <fa-icon class="hf-icon" [icon]="faCompass"></fa-icon>
+          <span>Discover More Communities</span>
+        </button>
+      </section>
+    </aside>
+
+    <main class="community-main-col">
+      <div class="community-main-feed">
+        <p class="text-muted" *ngIf="loading">Loading community...</p>
+
+        <section class="community-not-found" *ngIf="!loading && notFound">
+          <h2>Community Not Found</h2>
+          <p>The community you requested does not exist.</p>
+          <button type="button" class="community-header-btn" (click)="goToCommunityDirectory()">Back to Communities</button>
+        </section>
+
+        <ng-container *ngIf="!loading && !notFound && community as currentCommunity">
+          <section class="community-header-card" [style.background-image]="currentCommunity.headerImageUrl ? 'linear-gradient(rgba(11,11,15,0.72), rgba(11,11,15,0.9)), url(' + currentCommunity.headerImageUrl + ')' : 'linear-gradient(135deg, #151525, #0f1117)'">
+            <div class="community-header-row">
+              <div class="community-header-left">
+                <div class="community-avatar">{{getCommunityAvatarLabel()}}</div>
+                <div class="community-title-block">
+                  <h1>{{currentCommunity.name}}</h1>
+                  <p>{{getCommunityTagline()}}</p>
+                </div>
+              </div>
+
+              <div class="community-header-actions">
+                <button
+                  type="button"
+                  class="community-header-btn create"
+                  [disabled]="deletingCommunity"
+                  (click)="goToCreatePost()">
+                  Create Post
+                </button>
+
+                <button
+                  *ngIf="!communityDetail?.member"
+                  type="button"
+                  class="community-header-btn join"
+                  [disabled]="joinInProgress || deletingCommunity"
+                  (click)="joinCommunity()">
+                  {{joinInProgress ? 'Joining...' : 'Join'}}
+                </button>
+
+                <button
+                  *ngIf="communityDetail?.member && !communityDetail?.creator"
+                  type="button"
+                  class="community-header-btn joined"
+                  [disabled]="joinInProgress || deletingCommunity"
+                  (click)="leaveCommunity()">
+                  {{joinInProgress ? 'Updating...' : 'Joined'}}
+                </button>
+
+                <span *ngIf="communityDetail?.creator" class="community-creator-pill">Creator</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="community-feed-card">
+            <h3>Community Posts</h3>
+
+            <p class="text-muted" *ngIf="postsLoading">Loading posts...</p>
+            <p class="text-muted" *ngIf="!postsLoading && posts.length === 0">No posts in this community yet.</p>
+
+            <app-post-tile *ngIf="!postsLoading && posts.length > 0" [posts]="posts"></app-post-tile>
+          </section>
+        </ng-container>
+      </div>
+    </main>
+
+    <aside class="community-info-col" *ngIf="!loading && !notFound && community as currentCommunity">
+      <section class="community-info-card">
+        <p class="community-info-label">Community</p>
+        <h3>{{currentCommunity.name}}</h3>
+
+        <p class="community-info-description">{{getDisplayedDescription()}}</p>
+        <button
+          *ngIf="shouldShowDescriptionToggle()"
+          type="button"
+          class="community-read-toggle"
+          (click)="toggleDescription()">
+          {{descriptionExpanded ? 'Read less' : 'Read more'}}
+        </button>
+
+        <div class="community-meta">
+          <div class="community-meta-row">
+            <span>Created</span>
+            <strong>{{currentCommunity.createdAt ? (currentCommunity.createdAt | date:'mediumDate') : 'Unknown'}}</strong>
+          </div>
+        </div>
+
+        <button type="button" class="community-guide-link" (click)="goToTopicArchive()">Community Guide</button>
+
+        <div class="community-admin" *ngIf="communityDetail?.canEdit">
+          <h4>Creator Controls</h4>
+
           <button
-            *ngIf="isLoggedIn && !communityDetail?.member"
             type="button"
-            class="btn btn-primary"
-            [disabled]="joinInProgress || deletingCommunity"
-            (click)="joinCommunity()">
-            Join
-          </button>
-
-          <button
-            *ngIf="isLoggedIn && communityDetail?.member && !communityDetail?.creator"
-            type="button"
-            class="btn btn-outline-primary"
-            [disabled]="joinInProgress || deletingCommunity"
-            (click)="leaveCommunity()">
-            Leave
-          </button>
-
-          <button
-            *ngIf="communityDetail?.canEdit"
-            type="button"
-            class="btn btn-outline-primary"
+            class="community-admin-btn"
             [disabled]="deletingCommunity"
             (click)="toggleEditMode()">
             {{editMode ? 'Cancel Edit' : 'Edit Community'}}
           </button>
 
           <button
-            *ngIf="communityDetail?.canEdit"
             type="button"
-            class="btn btn-danger"
+            class="community-admin-btn delete"
             [disabled]="deletingCommunity"
             (click)="deleteCommunity()">
             {{deletingCommunity ? 'Deleting...' : 'Delete Community'}}
           </button>
         </div>
-      </div>
-    </section>
 
-    <section class="community-edit" *ngIf="editMode">
-      <h3>Edit Community</h3>
+        <div class="community-edit" *ngIf="editMode">
+          <label for="community-description">Description</label>
+          <textarea id="community-description" rows="4" [formControl]="editForm.controls.description"></textarea>
 
-      <label for="community-description">Description</label>
-      <textarea id="community-description" rows="4" [formControl]="editForm.controls.description"></textarea>
+          <label for="community-banner">Header Image URL</label>
+          <input id="community-banner" type="text" [formControl]="editForm.controls.headerImageUrl" placeholder="https://...">
 
-      <label for="community-banner">Header Image URL</label>
-      <input id="community-banner" type="text" [formControl]="editForm.controls.headerImageUrl" placeholder="https://...">
+          <button
+            type="button"
+            class="community-admin-btn save"
+            [disabled]="saveInProgress || deletingCommunity"
+            (click)="saveCommunityChanges()">
+            {{saveInProgress ? 'Saving...' : 'Save Changes'}}
+          </button>
+        </div>
+      </section>
+    </aside>
 
-      <div class="community-edit-actions">
-        <button type="button" class="btn btn-primary" [disabled]="saveInProgress || deletingCommunity" (click)="saveCommunityChanges()">Save</button>
-      </div>
-    </section>
-
-    <section class="community-feed">
-      <h3>Community Posts</h3>
-
-      <p class="text-muted" *ngIf="postsLoading">Loading posts...</p>
-      <p class="text-muted" *ngIf="!postsLoading && posts.length === 0">No posts in this community yet.</p>
-
-      <app-post-tile *ngIf="!postsLoading && posts.length > 0" [posts]="posts"></app-post-tile>
-    </section>
-  </ng-container>
-</div>
-
-<ng-template #communityLoading>
-  <div class="community-page">
-    <p class="text-muted">Loading community...</p>
+    <div class="hf-right-gutter" aria-hidden="true"></div>
   </div>
-</ng-template>
+</div>
