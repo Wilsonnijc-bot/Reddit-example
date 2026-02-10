@@ -19,9 +19,7 @@ export class CreateSubredditComponent implements OnInit {
   ) {
     this.createSubredditForm = new FormGroup({
       title: new FormControl('', Validators.required),
-      description: new FormControl('', Validators.required),
-      avatarImageUrl: new FormControl(''),
-      bannerImageUrl: new FormControl('')
+      description: new FormControl('', Validators.required)
     });
   }
 
@@ -40,9 +38,7 @@ export class CreateSubredditComponent implements OnInit {
 
     const payload = {
       name: (this.createSubredditForm.get('title')?.value || '').trim(),
-      description: (this.createSubredditForm.get('description')?.value || '').trim(),
-      avatarImageUrl: (this.createSubredditForm.get('avatarImageUrl')?.value || '').trim(),
-      bannerImageUrl: (this.createSubredditForm.get('bannerImageUrl')?.value || '').trim()
+      description: (this.createSubredditForm.get('description')?.value || '').trim()
     };
 
     this.communityService.createCommunity(payload).subscribe({

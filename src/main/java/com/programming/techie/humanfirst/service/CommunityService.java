@@ -65,16 +65,10 @@ public class CommunityService {
         String name = normalizeRequired(request.getName(), "Community name is required");
         String slug = ensureUniqueSlug(name);
 
-        String bannerImageValue = normalizeNullable(resolveBannerInput(request.getBannerImageUrl(), request.getHeaderImageUrl()));
-        String avatarImageValue = normalizeNullable(request.getAvatarImageUrl());
-
         Community community = Community.builder()
                 .name(name)
                 .slug(slug)
                 .description(normalizeNullable(request.getDescription()))
-                .bannerImageUrl(bannerImageValue)
-                .headerImageUrl(bannerImageValue)
-                .avatarImageUrl(avatarImageValue)
                 .createdBy(currentUser)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())

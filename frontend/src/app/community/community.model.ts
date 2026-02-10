@@ -22,10 +22,6 @@ export interface CommunityDetail {
 export interface CommunityCreatePayload {
   name: string;
   description?: string;
-  avatarImageUrl?: string;
-  bannerImageUrl?: string;
-  // Legacy alias accepted by backend.
-  headerImageUrl?: string;
 }
 
 export interface CommunityUpdatePayload {
