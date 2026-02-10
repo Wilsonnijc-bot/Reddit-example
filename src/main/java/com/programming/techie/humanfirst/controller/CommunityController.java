@@ -53,6 +53,12 @@ public class CommunityController {
         return ResponseEntity.ok(communityService.updateCommunity(slug, request));
     }
 
+    @DeleteMapping("/{slug}")
+    public ResponseEntity<Void> deleteCommunity(@PathVariable String slug) {
+        communityService.deleteCommunity(slug);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{slug}/join")
     public ResponseEntity<CommunityDetailDto> joinCommunity(@PathVariable String slug) {
         return ResponseEntity.ok(communityService.joinCommunity(slug));

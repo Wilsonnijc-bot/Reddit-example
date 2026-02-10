@@ -1,0 +1,14 @@
+.my-likes-page {
+  padding: 14px 20px 16px;
+  max-width: 860px;
+}
+
+.my-likes-page h2 {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1023px) {
+  .my-likes-page {
+    padding: 12px;
+  }
+}

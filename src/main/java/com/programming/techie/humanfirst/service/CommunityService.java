@@ -9,9 +9,11 @@ import com.programming.techie.humanfirst.exceptions.HumanfirstException;
 import com.programming.techie.humanfirst.model.Community;
 import com.programming.techie.humanfirst.model.CommunityMembership;
 import com.programming.techie.humanfirst.model.CommunityMembershipRole;
+import com.programming.techie.humanfirst.model.Post;
 import com.programming.techie.humanfirst.model.User;
 import com.programming.techie.humanfirst.repository.CommunityMembershipRepository;
 import com.programming.techie.humanfirst.repository.CommunityRepository;
+import com.programming.techie.humanfirst.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,7 @@ public class CommunityService {
 
     private final CommunityRepository communityRepository;
     private final CommunityMembershipRepository communityMembershipRepository;
+    private final PostRepository postRepository;
     private final AuthService authService;
 
     @Transactional(readOnly = true)
@@ -88,6 +91,24 @@ public class CommunityService {
 
         Community updatedCommunity = communityRepository.save(community);
         return toSummary(updatedCommunity);
+    }
+
+    public void deleteCommunity(String slug) {
+        Community community = findBySlugOrThrow(slug);
+        User currentUser = authService.getCurrentUser();
+
+        if (!hasCreatorAccess(currentUser, community)) {
+            throw new ResponseStatusException(FORBIDDEN, "Only the community creator can delete this community");
+        }
+
+        List<Post> communityPosts = postRepository.findAllByCommunityOrderByCreatedDateDesc(community);
+        if (!communityPosts.isEmpty()) {
+            communityPosts.forEach(post -> post.setCommunity(null));
+            postRepository.saveAll(communityPosts);
+        }
+
+        communityMembershipRepository.deleteByCommunity(community);
+        communityRepository.delete(community);
     }
 
     public CommunityDetailDto joinCommunity(String slug) {

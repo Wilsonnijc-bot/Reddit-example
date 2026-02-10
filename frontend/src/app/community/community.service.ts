@@ -36,6 +36,10 @@ export class CommunityService {
     return this.http.put<CommunitySummary>(`${this.apiBaseUrl}/api/communities/${slug}`, payload);
   }
 
+  deleteCommunity(slug: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiBaseUrl}/api/communities/${slug}`);
+  }
+
   joinCommunity(slug: string): Observable<CommunityDetail> {
     return this.http.post<CommunityDetail>(`${this.apiBaseUrl}/api/communities/${slug}/join`, {});
   }

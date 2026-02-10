@@ -28,6 +28,7 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
   joinInProgress = false;
   editMode = false;
   saveInProgress = false;
+  deletingCommunity = false;
 
   editForm = new FormGroup({
     description: new FormControl(''),
@@ -70,7 +71,7 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
   }
 
   toggleEditMode() {
-    if (!this.community || !this.communityDetail?.canEdit) {
+    if (!this.community || !this.communityDetail?.canEdit || this.deletingCommunity) {
       return;
     }
 
@@ -84,7 +85,7 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
   }
 
   saveCommunityChanges() {
-    if (!this.communityDetail?.canEdit || !this.community) {
+    if (!this.communityDetail?.canEdit || !this.community || this.deletingCommunity) {
       return;
     }
 
@@ -110,13 +111,42 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  deleteCommunity() {
+    if (!this.communityDetail?.canEdit || !this.community || this.deletingCommunity) {
+      return;
+    }
+
+    const communityName = this.community.name;
+    const typedName = window.prompt(`Type "${communityName}" to confirm community deletion.`);
+    if (typedName === null) {
+      return;
+    }
+
+    if (typedName.trim() !== communityName) {
+      this.toastr.error('Community name does not match. Delete cancelled.');
+      return;
+    }
+
+    this.deletingCommunity = true;
+    this.communityService.deleteCommunity(this.slug).subscribe({
+      next: () => {
+        this.toastr.success('Community deleted');
+        this.router.navigateByUrl('/communities');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.deletingCommunity = false;
+        this.toastr.error(error?.error?.message || 'Failed to delete community');
+      }
+    });
+  }
+
   joinCommunity() {
     if (!this.isLoggedIn) {
       this.router.navigateByUrl('/login');
       return;
     }
 
-    if (!this.slug || this.joinInProgress) {
+    if (!this.slug || this.joinInProgress || this.deletingCommunity) {
       return;
     }
 
@@ -140,7 +170,7 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.slug || this.joinInProgress) {
+    if (!this.slug || this.joinInProgress || this.deletingCommunity) {
       return;
     }
 

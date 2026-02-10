@@ -58,5 +58,14 @@
       <fa-icon [icon]="faShare"></fa-icon>
       <span>Share</span>
     </button>
+
+    <button
+      *ngIf="showDeleteAction"
+      type="button"
+      class="hf-action-btn hf-delete-btn"
+      [disabled]="isDeleting(post)"
+      (click)="requestDelete(post)">
+      <span>{{isDeleting(post) ? 'Deleting...' : 'Delete'}}</span>
+    </button>
   </div>
 </div>

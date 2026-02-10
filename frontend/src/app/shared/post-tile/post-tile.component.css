@@ -174,3 +174,18 @@
     background: #1b1b28;
     color: var(--hf-text);
 }
+
+.hf-delete-btn {
+    border-color: #5a1f2d;
+    color: #ff8fa8;
+}
+
+.hf-delete-btn:hover {
+    background: #3a1420;
+    color: #ffc5d3;
+}
+
+.hf-delete-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

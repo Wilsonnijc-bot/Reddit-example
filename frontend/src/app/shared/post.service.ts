@@ -38,4 +38,16 @@ export class PostService {
   getAllPostsByUser(name: string): Observable<PostModel[]> {
     return this.http.get<PostModel[]>(`${this.apiBaseUrl}/api/posts/by-user/${name}`);
   }
+
+  getMyPosts(): Observable<PostModel[]> {
+    return this.http.get<PostModel[]>(`${this.apiBaseUrl}/api/posts/mine`);
+  }
+
+  getMyLikedPosts(): Observable<PostModel[]> {
+    return this.http.get<PostModel[]>(`${this.apiBaseUrl}/api/posts/liked`);
+  }
+
+  deletePost(postId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiBaseUrl}/api/posts/${postId}`);
+  }
 }

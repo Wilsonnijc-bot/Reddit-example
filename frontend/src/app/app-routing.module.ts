@@ -15,6 +15,8 @@ import { TopicsArchiveComponent } from './topics/topics-archive/topics-archive.c
 import { CommunityPageComponent } from './community/community-page/community-page.component';
 import { CommunityDirectoryComponent } from './community/community-directory/community-directory.component';
 import { MyCommunitiesComponent } from './community/my-communities/my-communities.component';
+import { MyPostsComponent } from './post/my-posts/my-posts.component';
+import { MyLikesComponent } from './post/my-likes/my-likes.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -28,6 +30,8 @@ const routes: Routes = [
   { path: 'communities/:slug', component: CommunityPageComponent },
   { path: 'communities', component: CommunityDirectoryComponent },
   { path: 'my-communities', component: MyCommunitiesComponent, canActivate: [AuthGuard] },
+  { path: 'my-posts', component: MyPostsComponent, canActivate: [AuthGuard] },
+  { path: 'my-likes', component: MyLikesComponent, canActivate: [AuthGuard] },
   { path: 'list-subreddits', component: ListSubredditsComponent },
   { path: 'create', component: CreatePostComponent, canActivate: [AuthGuard] },
   { path: 'create-post', redirectTo: '/create', pathMatch: 'full' },

@@ -6,6 +6,7 @@ import com.programming.techie.humanfirst.service.PostService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,9 +36,25 @@ public class PostController {
         return status(HttpStatus.OK).body(postService.getAllPosts());
     }
 
+    @GetMapping("mine")
+    public ResponseEntity<List<PostResponse>> getMyPosts() {
+        return status(HttpStatus.OK).body(postService.getMyPosts());
+    }
+
+    @GetMapping("liked")
+    public ResponseEntity<List<PostResponse>> getMyLikedPosts() {
+        return status(HttpStatus.OK).body(postService.getMyLikedPosts());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPost(@PathVariable Long id) {
         return status(HttpStatus.OK).body(postService.getPost(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
+        postService.deletePost(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("by-subreddit/{id}")

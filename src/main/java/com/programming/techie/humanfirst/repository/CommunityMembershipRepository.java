@@ -19,4 +19,6 @@ public interface CommunityMembershipRepository extends JpaRepository<CommunityMe
     List<CommunityMembership> findAllByUserOrderByCreatedAtDesc(User user);
 
     List<CommunityMembership> findAllByCommunityOrderByCreatedAtDesc(Community community);
+
+    void deleteByCommunity(Community community);
 }

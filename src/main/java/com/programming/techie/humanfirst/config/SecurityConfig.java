@@ -34,13 +34,15 @@ public class SecurityConfig {
                                 "/login", "/sign-up", "/list-subreddits",
                                 "/create", "/create-post", "/create-subreddit", "/view-post/**", "/r/**",
                                 "/user-profile/**", "/account-verification/**", "/signup", "/topics", "/topics/**",
-                                "/communities", "/communities/**", "/my-communities"
+                                "/communities", "/communities/**", "/my-communities", "/my-posts", "/my-likes"
                         ).permitAll()
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/*.js", "/*.css", "/*.map").permitAll()
                         .requestMatchers("/tinymce/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/communities/mine").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/mine", "/api/posts/liked").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/subreddit", "/api/subreddit/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()

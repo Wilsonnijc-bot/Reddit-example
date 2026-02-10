@@ -30,6 +30,8 @@ import { TopicCommentThreadComponent } from './topics/topic-comment-thread/topic
 import { CommunityPageComponent } from './community/community-page/community-page.component';
 import { CommunityDirectoryComponent } from './community/community-directory/community-directory.component';
 import { MyCommunitiesComponent } from './community/my-communities/my-communities.component';
+import { MyPostsComponent } from './post/my-posts/my-posts.component';
+import { MyLikesComponent } from './post/my-likes/my-likes.component';
 
 
 @NgModule({
@@ -52,7 +54,9 @@ import { MyCommunitiesComponent } from './community/my-communities/my-communitie
     TopicCommentThreadComponent,
     CommunityPageComponent,
     CommunityDirectoryComponent,
-    MyCommunitiesComponent
+    MyCommunitiesComponent,
+    MyPostsComponent,
+    MyLikesComponent
   ],
   imports: [
     BrowserModule,

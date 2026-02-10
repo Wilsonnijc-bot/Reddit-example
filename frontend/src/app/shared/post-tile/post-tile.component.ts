@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PostModel } from '../post-model';
 import { faComments, faEllipsisH, faHeart, faPlay, faShare, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
 import { Router } from '@angular/router';
@@ -18,6 +18,9 @@ export class PostTileComponent implements OnInit {
   faPlay = faPlay;
   faVolumeMute = faVolumeMute;
   @Input() posts: PostModel[];
+  @Input() showDeleteAction = false;
+  @Input() deletingPostId: number | null = null;
+  @Output() deleteRequested = new EventEmitter<PostModel>();
 
   constructor(private router: Router) {
   }
@@ -80,6 +83,14 @@ export class PostTileComponent implements OnInit {
       webNavigator.clipboard.writeText(shareUrl).catch(() => {
       });
     }
+  }
+
+  requestDelete(post: PostModel): void {
+    this.deleteRequested.emit(post);
+  }
+
+  isDeleting(post: PostModel): boolean {
+    return !!post && !!this.deletingPostId && post.id === this.deletingPostId;
   }
 
   getCommunityLabel(post: PostModel): string {

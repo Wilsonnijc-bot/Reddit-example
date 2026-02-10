@@ -1,0 +1,8 @@
+<div class="my-likes-page">
+  <h2>My Likes</h2>
+
+  <p class="text-muted" *ngIf="loading">Loading liked posts...</p>
+  <p class="text-muted" *ngIf="!loading && posts.length === 0">You haven’t liked any posts yet.</p>
+
+  <app-post-tile *ngIf="!loading && posts.length > 0" [posts]="posts"></app-post-tile>
+</div>

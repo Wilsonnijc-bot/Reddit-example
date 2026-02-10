@@ -16,7 +16,7 @@
             *ngIf="isLoggedIn && !communityDetail?.member"
             type="button"
             class="btn btn-primary"
-            [disabled]="joinInProgress"
+            [disabled]="joinInProgress || deletingCommunity"
             (click)="joinCommunity()">
             Join
           </button>
@@ -25,7 +25,7 @@
             *ngIf="isLoggedIn && communityDetail?.member && !communityDetail?.creator"
             type="button"
             class="btn btn-outline-primary"
-            [disabled]="joinInProgress"
+            [disabled]="joinInProgress || deletingCommunity"
             (click)="leaveCommunity()">
             Leave
           </button>
@@ -34,8 +34,18 @@
             *ngIf="communityDetail?.canEdit"
             type="button"
             class="btn btn-outline-primary"
+            [disabled]="deletingCommunity"
             (click)="toggleEditMode()">
             {{editMode ? 'Cancel Edit' : 'Edit Community'}}
+          </button>
+
+          <button
+            *ngIf="communityDetail?.canEdit"
+            type="button"
+            class="btn btn-danger"
+            [disabled]="deletingCommunity"
+            (click)="deleteCommunity()">
+            {{deletingCommunity ? 'Deleting...' : 'Delete Community'}}
           </button>
         </div>
       </div>
@@ -51,7 +61,7 @@
       <input id="community-banner" type="text" [formControl]="editForm.controls.headerImageUrl" placeholder="https://...">
 
       <div class="community-edit-actions">
-        <button type="button" class="btn btn-primary" [disabled]="saveInProgress" (click)="saveCommunityChanges()">Save</button>
+        <button type="button" class="btn btn-primary" [disabled]="saveInProgress || deletingCommunity" (click)="saveCommunityChanges()">Save</button>
       </div>
     </section>
 

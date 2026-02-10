@@ -1,0 +1,14 @@
+<div class="my-posts-page">
+  <h2>My Posts</h2>
+
+  <p class="text-muted" *ngIf="loading">Loading your posts...</p>
+  <p class="text-muted" *ngIf="!loading && posts.length === 0">You haven’t created any posts yet.</p>
+
+  <app-post-tile
+    *ngIf="!loading && posts.length > 0"
+    [posts]="posts"
+    [showDeleteAction]="true"
+    [deletingPostId]="deletingPostId"
+    (deleteRequested)="onDeleteRequested($event)">
+  </app-post-tile>
+</div>

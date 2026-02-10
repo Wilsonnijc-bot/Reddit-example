@@ -28,6 +28,14 @@ export class HeaderComponent implements OnInit {
     this.router.navigateByUrl('/user-profile/' + this.username);
   }
 
+  goToMyPosts() {
+    this.router.navigateByUrl('/my-posts');
+  }
+
+  goToMyLikes() {
+    this.router.navigateByUrl('/my-likes');
+  }
+
   goToMyCommunities() {
     this.router.navigateByUrl('/my-communities');
   }
