@@ -16,6 +16,9 @@ public class CommunitySummaryDto {
     private String name;
     private String slug;
     private String description;
+    private String avatarImageUrl;
+    private String bannerImageUrl;
+    // Legacy alias for old clients; mirrors bannerImageUrl.
     private String headerImageUrl;
     private Long createdByUserId;
     private Instant createdAt;

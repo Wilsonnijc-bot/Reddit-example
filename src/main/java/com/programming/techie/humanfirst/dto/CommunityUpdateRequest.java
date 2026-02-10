@@ -9,5 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommunityUpdateRequest {
     private String description;
+    private String avatarImageUrl;
+    private String bannerImageUrl;
+    // Legacy alias accepted for backward compatibility.
     private String headerImageUrl;
 }

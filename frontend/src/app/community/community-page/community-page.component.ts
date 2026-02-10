@@ -10,15 +10,16 @@ import {
   faCompass,
   faHome,
   faLayerGroup,
-  faPlus,
-  faUsers
+  faPlus
 } from '@fortawesome/free-solid-svg-icons';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { CommunityDetail, CommunitySummary } from '../community.model';
 import { CommunityService } from '../community.service';
 import { PostService } from '../../shared/post.service';
 import { PostModel } from '../../shared/post-model';
 import { AuthService } from '../../auth/shared/auth.service';
 import { TopicDiscussionService } from '../../topics/topic-discussion.service';
+import { VideoUploadService } from '../../shared/video-upload.service';
 
 @Component({
   selector: 'app-community-page',
@@ -44,6 +45,17 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
   selectedDomain = 'all';
   sidebarCommunities: CommunitySummary[] = [];
 
+  avatarPreviewUrl: string | null = null;
+  bannerPreviewUrl: string | null = null;
+  avatarUploadFileName = '';
+  bannerUploadFileName = '';
+  isUploadingAvatar = false;
+  isUploadingBanner = false;
+  isAvatarDragActive = false;
+  isBannerDragActive = false;
+
+  readonly acceptedCommunityImageTypes = '.jpg,.jpeg,.png,.webp,.gif';
+
   readonly primaryNavItems = [
     { key: 'home', label: 'Home', icon: faHome, domain: 'all' }
   ];
@@ -59,15 +71,16 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
   readonly faCompass = faCompass;
   readonly faPlus = faPlus;
   readonly faChevronDown = faChevronDown;
-  readonly faUsers = faUsers;
 
   editForm = new FormGroup({
     description: new FormControl(''),
-    headerImageUrl: new FormControl('')
+    avatarImageUrl: new FormControl(''),
+    bannerImageUrl: new FormControl('')
   });
 
   private routeSubscription?: Subscription;
   private readonly descriptionPreviewLimit = 220;
+  private readonly maxCommunityImageBytes = 8 * 1024 * 1024;
   private currentTopicSlug: string | null = null;
 
   constructor(
@@ -77,7 +90,8 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private communityService: CommunityService,
     private postService: PostService,
-    private topicDiscussionService: TopicDiscussionService
+    private topicDiscussionService: TopicDiscussionService,
+    private videoUploadService: VideoUploadService
   ) {
   }
 
@@ -100,6 +114,7 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
       this.slug = slug;
       this.editMode = false;
       this.descriptionExpanded = false;
+      this.resetMediaEditState();
       this.loadCommunityAndPosts();
     });
   }
@@ -130,6 +145,15 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     }
 
     this.router.navigate(['/communities', item.slug]);
+  }
+
+  hasCommunityAvatar(item: CommunitySummary): boolean {
+    return !!item?.avatarImageUrl;
+  }
+
+  getSidebarCommunityInitial(item: CommunitySummary): string {
+    const name = item?.name || '';
+    return name.trim().charAt(0).toUpperCase() || 'C';
   }
 
   goToCreateSubreddit() {
@@ -179,20 +203,27 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     if (this.editMode) {
       this.editForm.patchValue({
         description: this.community.description || '',
-        headerImageUrl: this.community.headerImageUrl || ''
+        avatarImageUrl: this.community.avatarImageUrl || '',
+        bannerImageUrl: this.community.bannerImageUrl || ''
       });
+      this.avatarPreviewUrl = this.community.avatarImageUrl || null;
+      this.bannerPreviewUrl = this.community.bannerImageUrl || null;
+      return;
     }
+
+    this.resetMediaEditState();
   }
 
   saveCommunityChanges() {
-    if (!this.communityDetail?.canEdit || !this.community || this.deletingCommunity) {
+    if (!this.communityDetail?.canEdit || !this.community || this.deletingCommunity || this.isUploadingAnyCommunityImage()) {
       return;
     }
 
     this.saveInProgress = true;
     this.communityService.updateCommunity(this.slug, {
       description: this.editForm.get('description')?.value || '',
-      headerImageUrl: this.editForm.get('headerImageUrl')?.value || ''
+      avatarImageUrl: this.editForm.get('avatarImageUrl')?.value || '',
+      bannerImageUrl: this.editForm.get('bannerImageUrl')?.value || ''
     }).subscribe({
       next: (updatedCommunity) => {
         this.community = updatedCommunity;
@@ -202,7 +233,9 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
         };
         this.editMode = false;
         this.saveInProgress = false;
+        this.resetMediaEditState();
         this.toastr.success('Community updated');
+        this.loadSidebarCommunities();
       },
       error: (error: HttpErrorResponse) => {
         this.saveInProgress = false;
@@ -319,6 +352,188 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     }
 
     return `${description.slice(0, 110).trim()}...`;
+  }
+
+  getBannerBackground(currentCommunity: CommunitySummary): string {
+    if (currentCommunity?.bannerImageUrl) {
+      return `linear-gradient(rgba(11,11,15,0.58), rgba(11,11,15,0.82)), url(${currentCommunity.bannerImageUrl})`;
+    }
+
+    return 'linear-gradient(120deg, #162033 0%, #182337 45%, #141726 100%)';
+  }
+
+  onAvatarDropZoneClick(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
+  onBannerDropZoneClick(fileInput: HTMLInputElement) {
+    fileInput.click();
+  }
+
+  onAvatarFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.handleCommunityImageSelection(input.files, 'avatar');
+    input.value = '';
+  }
+
+  onBannerFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.handleCommunityImageSelection(input.files, 'banner');
+    input.value = '';
+  }
+
+  onAvatarDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isAvatarDragActive = true;
+  }
+
+  onAvatarDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isAvatarDragActive = false;
+  }
+
+  onAvatarDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isAvatarDragActive = false;
+    this.handleCommunityImageSelection(event.dataTransfer?.files || null, 'avatar');
+  }
+
+  onBannerDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isBannerDragActive = true;
+  }
+
+  onBannerDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isBannerDragActive = false;
+  }
+
+  onBannerDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isBannerDragActive = false;
+    this.handleCommunityImageSelection(event.dataTransfer?.files || null, 'banner');
+  }
+
+  private handleCommunityImageSelection(files: FileList | null, target: 'avatar' | 'banner') {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    if (files.length > 1) {
+      this.toastr.info('Only one image can be uploaded at a time. Using the most recent file.');
+    }
+
+    const file = files.item(files.length - 1);
+    if (!file) {
+      return;
+    }
+
+    const validationError = this.validateCommunityImage(file);
+    if (validationError) {
+      this.toastr.error(validationError);
+      return;
+    }
+
+    this.uploadCommunityImage(file, target);
+  }
+
+  private validateCommunityImage(file: File): string | null {
+    if (!this.isSupportedCommunityImage(file)) {
+      return 'Unsupported image type. Use jpg, jpeg, png, webp, or gif.';
+    }
+
+    if (file.size > this.maxCommunityImageBytes) {
+      return 'Image is too large. Max size is 8 MB.';
+    }
+
+    return null;
+  }
+
+  private isSupportedCommunityImage(file: File): boolean {
+    const fileType = (file.type || '').toLowerCase();
+    if ([
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif'
+    ].includes(fileType)) {
+      return true;
+    }
+
+    return /\.(jpe?g|png|webp|gif)$/i.test(file.name || '');
+  }
+
+  private uploadCommunityImage(file: File, target: 'avatar' | 'banner') {
+    this.setImageUploadState(target, true);
+
+    this.videoUploadService.createMediaUploadUrl(file.name, file.type, 'IMAGE').pipe(
+      switchMap((uploadData) => this.videoUploadService.uploadFile(uploadData.uploadUrl, file).pipe(
+        tap(() => {
+          const objectKey = uploadData.objectKey;
+
+          if (target === 'avatar') {
+            this.editForm.patchValue({ avatarImageUrl: objectKey });
+            this.avatarPreviewUrl = URL.createObjectURL(file);
+            this.avatarUploadFileName = file.name;
+          } else {
+            this.editForm.patchValue({ bannerImageUrl: objectKey });
+            this.bannerPreviewUrl = URL.createObjectURL(file);
+            this.bannerUploadFileName = file.name;
+          }
+
+          this.toastr.success(`${target === 'avatar' ? 'Avatar' : 'Banner'} uploaded`);
+        })
+      )),
+      finalize(() => this.setImageUploadState(target, false))
+    ).subscribe({
+      error: (error: HttpErrorResponse) => {
+        this.toastr.error(this.extractUploadErrorMessage(error));
+      }
+    });
+  }
+
+  private setImageUploadState(target: 'avatar' | 'banner', uploading: boolean) {
+    if (target === 'avatar') {
+      this.isUploadingAvatar = uploading;
+      return;
+    }
+
+    this.isUploadingBanner = uploading;
+  }
+
+  private extractUploadErrorMessage(error: HttpErrorResponse): string {
+    const backendMessage = error?.error?.message || error?.message;
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    if (error?.status === 0) {
+      return 'Upload failed. Check network/S3 CORS configuration and try again.';
+    }
+
+    return 'Image upload failed';
+  }
+
+  private isUploadingAnyCommunityImage(): boolean {
+    return this.isUploadingAvatar || this.isUploadingBanner;
+  }
+
+  private resetMediaEditState() {
+    this.avatarPreviewUrl = null;
+    this.bannerPreviewUrl = null;
+    this.avatarUploadFileName = '';
+    this.bannerUploadFileName = '';
+    this.isAvatarDragActive = false;
+    this.isBannerDragActive = false;
+    this.isUploadingAvatar = false;
+    this.isUploadingBanner = false;
   }
 
   private navigateToHomeDomain(domain: string) {

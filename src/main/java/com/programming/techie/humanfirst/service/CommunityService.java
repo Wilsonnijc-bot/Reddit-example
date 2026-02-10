@@ -34,6 +34,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityMembershipRepository communityMembershipRepository;
     private final PostRepository postRepository;
+    private final VideoStorageService videoStorageService;
     private final AuthService authService;
 
     @Transactional(readOnly = true)
@@ -62,11 +63,16 @@ public class CommunityService {
         String name = normalizeRequired(request.getName(), "Community name is required");
         String slug = ensureUniqueSlug(name);
 
+        String bannerImageValue = normalizeNullable(resolveBannerInput(request.getBannerImageUrl(), request.getHeaderImageUrl()));
+        String avatarImageValue = normalizeNullable(request.getAvatarImageUrl());
+
         Community community = Community.builder()
                 .name(name)
                 .slug(slug)
                 .description(normalizeNullable(request.getDescription()))
-                .headerImageUrl(normalizeNullable(request.getHeaderImageUrl()))
+                .bannerImageUrl(bannerImageValue)
+                .headerImageUrl(bannerImageValue)
+                .avatarImageUrl(avatarImageValue)
                 .createdBy(currentUser)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
@@ -85,8 +91,12 @@ public class CommunityService {
             throw new ResponseStatusException(FORBIDDEN, "Only the community creator can edit this community");
         }
 
+        String bannerImageValue = normalizeNullable(resolveBannerInput(request.getBannerImageUrl(), request.getHeaderImageUrl()));
+
         community.setDescription(normalizeNullable(request.getDescription()));
-        community.setHeaderImageUrl(normalizeNullable(request.getHeaderImageUrl()));
+        community.setAvatarImageUrl(normalizeNullable(request.getAvatarImageUrl()));
+        community.setBannerImageUrl(bannerImageValue);
+        community.setHeaderImageUrl(bannerImageValue);
         community.setUpdatedAt(Instant.now());
 
         Community updatedCommunity = communityRepository.save(community);
@@ -175,12 +185,17 @@ public class CommunityService {
     }
 
     private CommunitySummaryDto toSummary(Community community) {
+        String bannerImageUrl = resolveMediaUrl(firstNonBlank(community.getBannerImageUrl(), community.getHeaderImageUrl()));
+        String avatarImageUrl = resolveMediaUrl(community.getAvatarImageUrl());
+
         return CommunitySummaryDto.builder()
                 .id(community.getId())
                 .name(community.getName())
                 .slug(community.getSlug())
                 .description(community.getDescription())
-                .headerImageUrl(community.getHeaderImageUrl())
+                .avatarImageUrl(avatarImageUrl)
+                .bannerImageUrl(bannerImageUrl)
+                .headerImageUrl(bannerImageUrl)
                 .createdByUserId(community.getCreatedBy() == null ? null : community.getCreatedBy().getUserId())
                 .createdAt(community.getCreatedAt())
                 .updatedAt(community.getUpdatedAt())
@@ -224,6 +239,46 @@ public class CommunityService {
 
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String resolveBannerInput(String bannerImageUrl, String legacyHeaderImageUrl) {
+        return firstNonBlank(bannerImageUrl, legacyHeaderImageUrl);
+    }
+
+    private String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+
+        for (String value : values) {
+            if (value == null) {
+                continue;
+            }
+            String trimmed = value.trim();
+            if (!trimmed.isEmpty()) {
+                return trimmed;
+            }
+        }
+
+        return null;
+    }
+
+    private String resolveMediaUrl(String rawValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return null;
+        }
+
+        String trimmed = rawValue.trim();
+        if (isAbsoluteUrl(trimmed)) {
+            return trimmed;
+        }
+
+        String generatedUrl = videoStorageService.generateViewUrl(trimmed);
+        return generatedUrl == null ? trimmed : generatedUrl;
+    }
+
+    private boolean isAbsoluteUrl(String value) {
+        return value.startsWith("http://") || value.startsWith("https://");
     }
 
     private User getCurrentUserOrNull() {

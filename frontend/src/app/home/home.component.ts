@@ -7,8 +7,7 @@ import {
   faCompass,
   faHome,
   faLayerGroup,
-  faPlus,
-  faUsers
+  faPlus
 } from '@fortawesome/free-solid-svg-icons';
 import { PostModel } from '../shared/post-model';
 import { PostService } from '../shared/post.service';
@@ -44,7 +43,6 @@ export class HomeComponent implements OnInit {
   readonly faCompass = faCompass;
   readonly faPlus = faPlus;
   readonly faChevronDown = faChevronDown;
-  readonly faUsers = faUsers;
 
   private currentTopicSlug: string | null = null;
   private subredditIdByDomain = new Map<string, number>();
@@ -106,6 +104,15 @@ export class HomeComponent implements OnInit {
 
   isItemActive(item: { domain?: string }) {
     return !!item.domain && this.selectedDomain === item.domain;
+  }
+
+  hasCommunityAvatar(item: CommunitySummary): boolean {
+    return !!item?.avatarImageUrl;
+  }
+
+  getCommunityInitial(item: CommunitySummary): string {
+    const name = item?.name || '';
+    return name.trim().charAt(0).toUpperCase() || 'C';
   }
 
   goToCreateSubreddit() {

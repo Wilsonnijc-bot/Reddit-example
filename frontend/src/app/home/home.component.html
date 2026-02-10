@@ -62,7 +62,10 @@
           type="button"
           class="hf-row"
           (click)="handleCommunityClick(item)">
-          <fa-icon class="hf-icon" [icon]="faUsers"></fa-icon>
+          <span class="hf-community-avatar" [class.placeholder]="!hasCommunityAvatar(item)">
+            <img *ngIf="hasCommunityAvatar(item)" [src]="item.avatarImageUrl" [alt]="item.name">
+            <span *ngIf="!hasCommunityAvatar(item)">{{getCommunityInitial(item)}}</span>
+          </span>
           <span>{{item.name}}</span>
         </button>
 

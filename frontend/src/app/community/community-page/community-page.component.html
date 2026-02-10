@@ -62,7 +62,10 @@
           type="button"
           class="hf-row"
           (click)="handleCommunityClick(item)">
-          <fa-icon class="hf-icon" [icon]="faUsers"></fa-icon>
+          <span class="hf-community-avatar" [class.placeholder]="!hasCommunityAvatar(item)">
+            <img *ngIf="hasCommunityAvatar(item)" [src]="item.avatarImageUrl" [alt]="item.name">
+            <span *ngIf="!hasCommunityAvatar(item)">{{getSidebarCommunityInitial(item)}}</span>
+          </span>
           <span>{{item.name}}</span>
         </button>
 
@@ -84,10 +87,16 @@
         </section>
 
         <ng-container *ngIf="!loading && !notFound && community as currentCommunity">
-          <section class="community-header-card" [style.background-image]="currentCommunity.headerImageUrl ? 'linear-gradient(rgba(11,11,15,0.72), rgba(11,11,15,0.9)), url(' + currentCommunity.headerImageUrl + ')' : 'linear-gradient(135deg, #151525, #0f1117)'">
+          <section class="community-header-card">
+            <div class="community-banner" [style.background-image]="getBannerBackground(currentCommunity)">
+              <div class="community-avatar-large" [class.placeholder]="!currentCommunity.avatarImageUrl">
+                <img *ngIf="currentCommunity.avatarImageUrl" [src]="currentCommunity.avatarImageUrl" [alt]="currentCommunity.name">
+                <span *ngIf="!currentCommunity.avatarImageUrl">{{getCommunityAvatarLabel()}}</span>
+              </div>
+            </div>
+
             <div class="community-header-row">
               <div class="community-header-left">
-                <div class="community-avatar">{{getCommunityAvatarLabel()}}</div>
                 <div class="community-title-block">
                   <h1>{{currentCommunity.name}}</h1>
                   <p>{{getCommunityTagline()}}</p>
@@ -185,13 +194,74 @@
           <label for="community-description">Description</label>
           <textarea id="community-description" rows="4" [formControl]="editForm.controls.description"></textarea>
 
-          <label for="community-banner">Header Image URL</label>
-          <input id="community-banner" type="text" [formControl]="editForm.controls.headerImageUrl" placeholder="https://...">
+          <div class="community-media-block">
+            <label>Avatar Headshot</label>
+            <input
+              #avatarImagePicker
+              type="file"
+              class="community-media-input"
+              [accept]="acceptedCommunityImageTypes"
+              (change)="onAvatarFileSelected($event)">
+            <div
+              class="community-media-dropzone"
+              [class.drag-active]="isAvatarDragActive"
+              [class.uploading]="isUploadingAvatar"
+              role="button"
+              tabindex="0"
+              aria-label="Upload community avatar"
+              (click)="onAvatarDropZoneClick(avatarImagePicker)"
+              (keydown.enter)="onAvatarDropZoneClick(avatarImagePicker)"
+              (keydown.space)="$event.preventDefault(); onAvatarDropZoneClick(avatarImagePicker)"
+              (dragover)="onAvatarDragOver($event)"
+              (dragleave)="onAvatarDragLeave($event)"
+              (drop)="onAvatarDrop($event)">
+              <strong>Upload avatar image</strong>
+              <span>Drag-and-drop or click</span>
+              <small>jpg, jpeg, png, webp, gif (max 8MB)</small>
+            </div>
+            <small *ngIf="isUploadingAvatar">Uploading avatar...</small>
+            <div class="community-media-preview avatar" *ngIf="avatarPreviewUrl && !isUploadingAvatar">
+              <img [src]="avatarPreviewUrl" alt="Avatar preview">
+            </div>
+            <small *ngIf="avatarUploadFileName">Selected avatar: {{avatarUploadFileName}}</small>
+          </div>
+
+          <div class="community-media-block">
+            <label>Banner Background</label>
+            <input
+              #bannerImagePicker
+              type="file"
+              class="community-media-input"
+              [accept]="acceptedCommunityImageTypes"
+              (change)="onBannerFileSelected($event)">
+            <div
+              class="community-media-dropzone"
+              [class.drag-active]="isBannerDragActive"
+              [class.uploading]="isUploadingBanner"
+              role="button"
+              tabindex="0"
+              aria-label="Upload community banner"
+              (click)="onBannerDropZoneClick(bannerImagePicker)"
+              (keydown.enter)="onBannerDropZoneClick(bannerImagePicker)"
+              (keydown.space)="$event.preventDefault(); onBannerDropZoneClick(bannerImagePicker)"
+              (dragover)="onBannerDragOver($event)"
+              (dragleave)="onBannerDragLeave($event)"
+              (drop)="onBannerDrop($event)">
+              <strong>Upload banner image</strong>
+              <span>Drag-and-drop or click</span>
+              <small>jpg, jpeg, png, webp, gif (max 8MB)</small>
+            </div>
+            <small *ngIf="isUploadingBanner">Uploading banner...</small>
+            <div class="community-media-preview banner" *ngIf="bannerPreviewUrl && !isUploadingBanner">
+              <img [src]="bannerPreviewUrl" alt="Banner preview">
+            </div>
+            <small *ngIf="bannerUploadFileName">Selected banner: {{bannerUploadFileName}}</small>
+          </div>
 
           <button
             type="button"
             class="community-admin-btn save"
-            [disabled]="saveInProgress || deletingCommunity"
+            [disabled]="saveInProgress || deletingCommunity || isUploadingAvatar || isUploadingBanner"
             (click)="saveCommunityChanges()">
             {{saveInProgress ? 'Saving...' : 'Save Changes'}}
           </button>

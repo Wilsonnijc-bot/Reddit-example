@@ -44,7 +44,12 @@ public class Community {
     @Lob
     private String description;
 
+    // Legacy field kept for compatibility with older records.
     private String headerImageUrl;
+
+    private String bannerImageUrl;
+
+    private String avatarImageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id", referencedColumnName = "userId")

@@ -10,5 +10,8 @@ import lombok.NoArgsConstructor;
 public class CommunityCreateRequest {
     private String name;
     private String description;
+    private String avatarImageUrl;
+    private String bannerImageUrl;
+    // Legacy alias accepted for backward compatibility.
     private String headerImageUrl;
 }

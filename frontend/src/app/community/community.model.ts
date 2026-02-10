@@ -3,6 +3,9 @@ export interface CommunitySummary {
   name: string;
   slug: string;
   description?: string;
+  avatarImageUrl?: string;
+  bannerImageUrl?: string;
+  // Legacy alias from backend for compatibility.
   headerImageUrl?: string;
   createdByUserId?: number;
   createdAt?: string;
@@ -19,11 +22,17 @@ export interface CommunityDetail {
 export interface CommunityCreatePayload {
   name: string;
   description?: string;
+  avatarImageUrl?: string;
+  bannerImageUrl?: string;
+  // Legacy alias accepted by backend.
   headerImageUrl?: string;
 }
 
 export interface CommunityUpdatePayload {
   description?: string;
+  avatarImageUrl?: string;
+  bannerImageUrl?: string;
+  // Legacy alias accepted by backend.
   headerImageUrl?: string;
 }
 
