@@ -1,7 +1,6 @@
 .topics-archive {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 16px;
+  width: 100%;
+  padding: 0 0 16px;
 }
 
 .topics-archive h1 {

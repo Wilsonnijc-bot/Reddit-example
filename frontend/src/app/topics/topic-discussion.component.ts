@@ -21,6 +21,7 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
   proCommentText = '';
   conCommentText = '';
   viewMode: 'month' | 'week' = 'month';
+  selectedDomain = 'all';
 
   private currentSlug: string | null = null;
   private routeSubscription?: Subscription;
@@ -109,6 +110,10 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
     this.loadTopic();
   }
 
+  onSidebarDomainSelected(domain: string): void {
+    this.navigateToHomeDomain(domain);
+  }
+
   getProBarPercent(): number {
     if (!this.topic?.voteSummary || this.topic.voteSummary.totalVotes === 0) {
       return 50;
@@ -150,6 +155,19 @@ export class TopicDiscussionComponent implements OnInit, OnDestroy {
 
   trackBySubdivision(index: number, item: { id: number }): number {
     return item.id || index;
+  }
+
+  private navigateToHomeDomain(domain: string) {
+    this.selectedDomain = domain;
+
+    if (domain === 'all') {
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.router.navigate(['/'], {
+      queryParams: { domain }
+    });
   }
 
   private loadTopic(): void {

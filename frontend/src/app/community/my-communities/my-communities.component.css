@@ -1,6 +1,6 @@
 .my-communities-page {
-  padding: 14px 20px 16px;
-  max-width: 980px;
+  width: 100%;
+  padding: 0 0 16px;
 }
 
 .my-communities-page h2 {
@@ -40,10 +40,4 @@
   border-color: var(--hf-border-strong);
   color: var(--hf-text);
   text-decoration: none;
-}
-
-@media (max-width: 1023px) {
-  .my-communities-page {
-    padding: 12px;
-  }
 }

@@ -33,6 +33,7 @@ import { MyCommunitiesComponent } from './community/my-communities/my-communitie
 import { MyPostsComponent } from './post/my-posts/my-posts.component';
 import { MyLikesComponent } from './post/my-likes/my-likes.component';
 import { HfSidebarComponent } from './shared/hf-sidebar/hf-sidebar.component';
+import { AppShellComponent } from './shared/app-shell/app-shell.component';
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { HfSidebarComponent } from './shared/hf-sidebar/hf-sidebar.component';
     MyCommunitiesComponent,
     MyPostsComponent,
     MyLikesComponent,
-    HfSidebarComponent
+    HfSidebarComponent,
+    AppShellComponent
   ],
   imports: [
     BrowserModule,

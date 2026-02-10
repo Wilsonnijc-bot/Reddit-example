@@ -1,0 +1,23 @@
+<div class="humanfirst-body">
+  <div class="hf-shell-layout">
+    <app-hf-sidebar
+      [selectedDomain]="selectedDomain"
+      [reloadToken]="sidebarReloadToken"
+      (domainSelected)="domainSelected.emit($event)">
+    </app-hf-sidebar>
+
+    <main class="hf-shell-main">
+      <div class="hf-shell-main-inner">
+        <ng-content select="[shell-center]"></ng-content>
+      </div>
+    </main>
+
+    <aside class="hf-shell-right">
+      <div class="hf-shell-right-inner">
+        <ng-content select="[shell-right]"></ng-content>
+      </div>
+    </aside>
+
+    <div class="hf-right-gutter" aria-hidden="true"></div>
+  </div>
+</div>

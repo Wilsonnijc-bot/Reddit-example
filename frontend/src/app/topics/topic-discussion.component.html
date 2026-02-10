@@ -1,38 +1,102 @@
-<div class="topic-page" *ngIf="!loading && topic; else topicStateTpl">
-  <ng-container *ngIf="isMonthView(); else weekTopicTpl">
-    <section class="topic-hero topic-hero-month">
-      <p class="topic-kicker">Topic of the month</p>
-      <h1 class="topic-title">{{topic.monthTitle}}</h1>
-      <p class="topic-month">This month is divided into weekly focus topics for deeper discussion.</p>
-      <button
-        type="button"
-        class="topic-btn topic-month-cta"
-        [disabled]="!topic.slug"
-        (click)="goToCurrentWeekTopic()">
-        Go to current Topic of the Week
-      </button>
-    </section>
+<app-hf-app-shell
+  [selectedDomain]="selectedDomain"
+  (domainSelected)="onSidebarDomainSelected($event)">
+  <div shell-center>
+    <div class="topic-page" *ngIf="!loading && topic; else topicStateTpl">
+      <ng-container *ngIf="isMonthView(); else weekTopicTpl">
+        <section class="topic-hero topic-hero-month">
+          <p class="topic-kicker">Topic of the month</p>
+          <h1 class="topic-title">{{topic.monthTitle}}</h1>
+          <p class="topic-month">This month is divided into weekly focus topics for deeper discussion.</p>
+          <button
+            type="button"
+            class="topic-btn topic-month-cta"
+            [disabled]="!topic.slug"
+            (click)="goToCurrentWeekTopic()">
+            Go to current Topic of the Week
+          </button>
+        </section>
 
-    <section class="topic-subdivisions topic-subdivisions-month">
-      <h2>4 weekly topics this month</h2>
-      <p class="topic-subdivisions-meta">Weekly tracks for this month:</p>
+        <section class="topic-subdivisions topic-subdivisions-month">
+          <h2>4 weekly topics this month</h2>
+          <p class="topic-subdivisions-meta">Weekly tracks for this month:</p>
 
-      <ul class="topic-subdivision-cards" *ngIf="topic.subdivisions?.length; else noSubdivisionsTpl">
-        <li *ngFor="let subdivision of topic.subdivisions; trackBy: trackBySubdivision">
-          <div class="topic-subdivision-card">{{subdivision.title}}</div>
-        </li>
-      </ul>
-    </section>
-  </ng-container>
+          <ul class="topic-subdivision-cards" *ngIf="topic.subdivisions?.length; else noSubdivisionsTpl">
+            <li *ngFor="let subdivision of topic.subdivisions; trackBy: trackBySubdivision">
+              <div class="topic-subdivision-card">{{subdivision.title}}</div>
+            </li>
+          </ul>
+        </section>
+      </ng-container>
 
-  <ng-template #weekTopicTpl>
-    <section class="topic-hero">
-      <p class="topic-kicker">Topic of the week</p>
-      <h1 class="topic-title">{{topic.weekTitle}}</h1>
-      <p class="topic-month">Topic of the month - {{topic.monthTitle}}</p>
-    </section>
+      <ng-template #weekTopicTpl>
+        <section class="topic-hero">
+          <p class="topic-kicker">Topic of the week</p>
+          <h1 class="topic-title">{{topic.weekTitle}}</h1>
+          <p class="topic-month">Topic of the month - {{topic.monthTitle}}</p>
+        </section>
 
-    <section class="topic-voting">
+        <section class="topic-passage">
+          <h2>About this week's topic</h2>
+          <div class="topic-passage-scroll">
+            {{getWeeklyTopicBody()}}
+          </div>
+        </section>
+
+        <section class="topic-comments-grid">
+          <article class="topic-column pro-column">
+            <h3>Pro comments</h3>
+            <p class="topic-column-meta">Highest upvoted comments are displayed first.</p>
+
+            <div class="topic-comment-editor">
+              <textarea
+                [value]="proCommentText"
+                (input)="proCommentText = $any($event.target).value"
+                placeholder="Share your pro argument"></textarea>
+              <button type="button" class="topic-btn" (click)="submitTopLevelComment('PRO')">Post Pro Comment</button>
+            </div>
+
+            <app-topic-comment-thread
+              [topicId]="topic.id"
+              [comments]="topic.proComments"
+              [stance]="'PRO'"
+              [isLoggedIn]="isLoggedIn"
+              (threadUpdated)="onThreadUpdated()">
+            </app-topic-comment-thread>
+          </article>
+
+          <article class="topic-column con-column">
+            <h3>Con comments</h3>
+            <p class="topic-column-meta">Highest upvoted comments are displayed first.</p>
+
+            <div class="topic-comment-editor">
+              <textarea
+                [value]="conCommentText"
+                (input)="conCommentText = $any($event.target).value"
+                placeholder="Share your con argument"></textarea>
+              <button type="button" class="topic-btn" (click)="submitTopLevelComment('CON')">Post Con Comment</button>
+            </div>
+
+            <app-topic-comment-thread
+              [topicId]="topic.id"
+              [comments]="topic.conComments"
+              [stance]="'CON'"
+              [isLoggedIn]="isLoggedIn"
+              (threadUpdated)="onThreadUpdated()">
+            </app-topic-comment-thread>
+          </article>
+        </section>
+      </ng-template>
+    </div>
+
+    <ng-template #topicStateTpl>
+      <div class="topic-state" *ngIf="loading">Loading topic discussion...</div>
+      <div class="topic-state topic-state-error" *ngIf="!loading && errorMessage">{{errorMessage}}</div>
+    </ng-template>
+  </div>
+
+  <div shell-right>
+    <section class="topic-voting topic-voting-sticky" *ngIf="!loading && topic && !isMonthView()">
       <div class="vote-header">
         <h2>Pros vs Cons</h2>
         <span>{{topic.voteSummary.totalVotes}} total votes</span>
@@ -65,65 +129,9 @@
         </button>
       </div>
     </section>
-
-    <section class="topic-passage">
-      <h2>About this week's topic</h2>
-      <div class="topic-passage-scroll">
-        {{getWeeklyTopicBody()}}
-      </div>
-    </section>
-
-    <section class="topic-comments-grid">
-      <article class="topic-column pro-column">
-        <h3>Pro comments</h3>
-        <p class="topic-column-meta">Highest upvoted comments are displayed first.</p>
-
-        <div class="topic-comment-editor">
-          <textarea
-            [value]="proCommentText"
-            (input)="proCommentText = $any($event.target).value"
-            placeholder="Share your pro argument"></textarea>
-          <button type="button" class="topic-btn" (click)="submitTopLevelComment('PRO')">Post Pro Comment</button>
-        </div>
-
-        <app-topic-comment-thread
-          [topicId]="topic.id"
-          [comments]="topic.proComments"
-          [stance]="'PRO'"
-          [isLoggedIn]="isLoggedIn"
-          (threadUpdated)="onThreadUpdated()">
-        </app-topic-comment-thread>
-      </article>
-
-      <article class="topic-column con-column">
-        <h3>Con comments</h3>
-        <p class="topic-column-meta">Highest upvoted comments are displayed first.</p>
-
-        <div class="topic-comment-editor">
-          <textarea
-            [value]="conCommentText"
-            (input)="conCommentText = $any($event.target).value"
-            placeholder="Share your con argument"></textarea>
-          <button type="button" class="topic-btn" (click)="submitTopLevelComment('CON')">Post Con Comment</button>
-        </div>
-
-        <app-topic-comment-thread
-          [topicId]="topic.id"
-          [comments]="topic.conComments"
-          [stance]="'CON'"
-          [isLoggedIn]="isLoggedIn"
-          (threadUpdated)="onThreadUpdated()">
-        </app-topic-comment-thread>
-      </article>
-    </section>
-  </ng-template>
-</div>
+  </div>
+</app-hf-app-shell>
 
 <ng-template #noSubdivisionsTpl>
   <p class="topic-subdivisions-empty">Weekly topics will appear here once configured.</p>
-</ng-template>
-
-<ng-template #topicStateTpl>
-  <div class="topic-state" *ngIf="loading">Loading topic discussion...</div>
-  <div class="topic-state topic-state-error" *ngIf="!loading && errorMessage">{{errorMessage}}</div>
 </ng-template>

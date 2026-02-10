@@ -24,9 +24,14 @@ const routes: Routes = [
   { path: 'r/:subreddit/comments/:id', component: ViewPostComponent },
   { path: 'view-post/:id', redirectTo: 'r/post/comments/:id', pathMatch: 'full' },
   { path: 'user-profile/:name', component: UserProfileComponent, canActivate: [AuthGuard] },
-  { path: 'topics/archive', component: TopicsArchiveComponent },
-  { path: 'topics/:slug', component: TopicDiscussionComponent },
-  { path: 'topics', component: TopicDiscussionComponent },
+  {
+    path: 'topics',
+    children: [
+      { path: '', component: TopicDiscussionComponent, pathMatch: 'full' },
+      { path: 'archive', component: TopicsArchiveComponent },
+      { path: ':slug', component: TopicDiscussionComponent }
+    ]
+  },
   { path: 'communities/:slug', component: CommunityPageComponent },
   { path: 'communities', component: CommunityDirectoryComponent },
   { path: 'my-communities', component: MyCommunitiesComponent, canActivate: [AuthGuard] },
@@ -39,7 +44,8 @@ const routes: Routes = [
   { path: 'sign-up', component: SignupComponent },
   { path: 'signup', redirectTo: '/sign-up', pathMatch: 'full' },
   { path: 'account-verification/:token', component: AccountVerificationComponent },
-  { path: 'login', component: LoginComponent }
+  { path: 'login', component: LoginComponent },
+  { path: '**', redirectTo: '', pathMatch: 'full' }
 ];
 
 @NgModule({

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { TopicDiscussionService } from '../topic-discussion.service';
 import { TopicWeekSummary } from '../topic.model';
@@ -12,10 +13,12 @@ export class TopicsArchiveComponent implements OnInit {
 
   topics: TopicWeekSummary[] = [];
   loading = false;
+  selectedDomain = 'all';
 
   constructor(
     private topicDiscussionService: TopicDiscussionService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private router: Router
   ) {
   }
 
@@ -35,5 +38,22 @@ export class TopicsArchiveComponent implements OnInit {
 
   trackByTopic(index: number, item: TopicWeekSummary): number {
     return item.id || index;
+  }
+
+  onSidebarDomainSelected(domain: string): void {
+    this.navigateToHomeDomain(domain);
+  }
+
+  private navigateToHomeDomain(domain: string) {
+    this.selectedDomain = domain;
+
+    if (domain === 'all') {
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.router.navigate(['/'], {
+      queryParams: { domain }
+    });
   }
 }
