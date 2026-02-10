@@ -14,6 +14,7 @@ import com.programming.techie.humanfirst.model.User;
 import com.programming.techie.humanfirst.repository.CommunityMembershipRepository;
 import com.programming.techie.humanfirst.repository.CommunityRepository;
 import com.programming.techie.humanfirst.repository.PostRepository;
+import com.programming.techie.humanfirst.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class CommunityService {
     private final CommunityRepository communityRepository;
     private final CommunityMembershipRepository communityMembershipRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final VideoStorageService videoStorageService;
     private final AuthService authService;
 
