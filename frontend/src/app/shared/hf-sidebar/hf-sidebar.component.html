@@ -29,9 +29,9 @@
     <div class="hf-section-header">
       <span>TOPICS</span>
     </div>
-    <div class="hf-row hf-static-row">
+    <button type="button" class="hf-row hf-action-row hf-topic-month-row" (click)="goToMonthlyTopic()">
       <span>{{monthlyTopicLabel}}</span>
-    </div>
+    </button>
     <button type="button" class="hf-row hf-action-row" (click)="goToCurrentTopic()">
       <span>{{weeklyTopicLabel}}</span>
     </button>

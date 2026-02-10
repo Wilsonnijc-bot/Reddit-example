@@ -104,7 +104,7 @@
 }
 
 .topic-passage-scroll {
-  max-height: 200px;
+  height: 220px;
   overflow-y: auto;
   border: 1px solid var(--hf-border);
   border-radius: 10px;

@@ -130,6 +130,10 @@
   color: var(--hf-text-secondary);
 }
 
+.hf-topic-month-row {
+  font-weight: 600;
+}
+
 @media (min-width: 1024px) {
   .hf-sidebar {
     width: 280px;

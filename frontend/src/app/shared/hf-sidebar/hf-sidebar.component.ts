@@ -112,6 +112,10 @@ export class HfSidebarComponent implements OnInit, OnChanges {
     this.router.navigateByUrl('/topics');
   }
 
+  goToMonthlyTopic() {
+    this.router.navigateByUrl('/topics');
+  }
+
   goToTopicArchive() {
     this.router.navigateByUrl('/topics/archive');
   }
