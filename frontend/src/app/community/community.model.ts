@@ -8,8 +8,8 @@ export interface CommunitySummary {
   // Legacy alias from backend for compatibility.
   headerImageUrl?: string;
   createdByUserId?: number;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | number;
+  updatedAt?: string | number;
 }
 
 export interface CommunityDetail {

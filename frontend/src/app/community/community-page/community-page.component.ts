@@ -269,6 +269,16 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
     return `${description.slice(0, this.descriptionPreviewLimit).trim()}...`;
   }
 
+  getCommunityCreatedYearMonth(): string {
+    const timestamp = this.normalizeApiTimestamp(this.community?.createdAt);
+    if (timestamp === null) {
+      return 'Unknown';
+    }
+
+    const date = new Date(timestamp);
+    return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`;
+  }
+
   getCommunityAvatarLabel(): string {
     const name = this.community?.name || '';
     return name.trim().charAt(0).toUpperCase() || 'C';
@@ -518,6 +528,35 @@ export class CommunityPageComponent implements OnInit, OnDestroy {
         this.toastr.error(error?.error?.message || 'Failed to load posts');
       }
     });
+  }
+
+  private normalizeApiTimestamp(value: string | number | null | undefined): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) {
+        return null;
+      }
+      return value < 1e12 ? Math.round(value * 1000) : value;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    if (/^-?\d+(?:\.\d+)?$/.test(trimmed)) {
+      const parsedNumeric = Number(trimmed);
+      if (!Number.isFinite(parsedNumeric)) {
+        return null;
+      }
+      return parsedNumeric < 1e12 ? Math.round(parsedNumeric * 1000) : parsedNumeric;
+    }
+
+    const parsedDate = Date.parse(trimmed);
+    return Number.isNaN(parsedDate) ? null : parsedDate;
   }
 
   private getCommunityDescription(): string {
